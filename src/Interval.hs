@@ -10,7 +10,7 @@ import Pitch
 -- Absolute distance in semitones between two pitches.
 type Upi = SWord8
 
-upi :: (Pitch , Pitch) -> Upi
+upi :: (SPitch , SPitch) -> Upi
 upi (p1 , p2) = ite (p1 .< p2) (p2 - p1) (p1 - p2)
 
 -- Names for intervals
