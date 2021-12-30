@@ -20,12 +20,14 @@ firstSpecies pps =
   let start  = head pps
       middle = tail (init pps)
       end    = (last middle , last pps)
+
+      scaleOk = map (inScale majorScale . snd) pps 
   
       startOk = checkStart start
       intervalsOk = map checkInterval middle
       motionOk = checkMotion pps
       endOk = checkEnd end
-  in startOk ++ intervalsOk ++ motionOk ++ endOk
+  in startOk ++ intervalsOk ++ motionOk ++ endOk ++ scaleOk
 
 -- Counterpoint must be a unison, perfect 5th or perfect octave above cantus firmus.
 checkStart :: SPitchPair -> [SBool]
