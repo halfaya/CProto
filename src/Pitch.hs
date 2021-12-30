@@ -4,11 +4,13 @@ module Pitch where
 
 import Data.SBV
 
-type Pitch      = Word8
-type PitchClass = Word8 -- must be between 0 and 11 inclusive
-type Octave     = Word8 -- C5 = middle C for Midi
+type Pitch      = Int8
+type PitchClass = Int8 -- must be between 0 and 11 inclusive
+type Octave     = Int8 -- C5 = middle C for Midi
 
-type SPitch     = SWord8
+type SPitch     = SInt8
+
+type SPitchPair = (SPitch, SPitch)
 
 standardMidiPitch :: PitchClass -> Octave -> Pitch
 standardMidiPitch p o = o * 12 + p
