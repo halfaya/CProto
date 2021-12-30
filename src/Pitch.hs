@@ -31,10 +31,9 @@ bb = standardMidiPitch 10
 b  = standardMidiPitch 11
 
 inScale :: SScale -> SPitch -> SBool
-inScale ps p = inScale' ps (p `sMod` 12) where 
-  inScale' []       p = sTrue
-  inScale' (q : []) p = p .== q
-  inScale' (q : qs) p = p .== q .|| inScale' qs p
+inScale ps p =
+  let p' = (p `sMod` 12)
+  in foldr (\q b -> (p' .== q) .|| b) sFalse ps
 
 -- C major scale, but can transpose to give other scales
 majorScale :: SScale

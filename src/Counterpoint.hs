@@ -50,14 +50,31 @@ checkInterval pp = let o = opi pp in isConsonant o .&& sNot (isUnison o)
 parallel :: (SPitchPair , SPitchPair) -> SBool
 parallel ((p1, q1), (p2, q2)) = opi (p1, p2) .== opi (q1, q2) 
 
+-- similar or parallel motion, except parallel motion where both notes stay the same
 similar :: (SPitchPair , SPitchPair) -> SBool
-similar ((p1, q1), (p2, q2)) =
+similar pps@((p1, q1), (p2, q2)) =
+  ((p1 .< p2 .&& q1 .< q2) .|| (p1 .> p2 .&& q1 .> q2))
+  .&& sNot (parallel pps)
+
+similarOrParallel :: (SPitchPair , SPitchPair) -> SBool
+similarOrParallel ((p1, q1), (p2, q2)) =
   (p1 .< p2 .&& q1 .< q2) .||
-  (p1 .> p2 .&& q1 .> q2)
+  (p1 .> p2 .&& q1 .> q2) .||
+  (p1 .== p2 .&& q1 .== q2)
+
+contrary :: (SPitchPair , SPitchPair) -> SBool
+contrary ((p1, q1), (p2, q2)) =
+  (p1 .< p2 .&& q1 .> q2) .||
+  (p1 .> p2 .&& q1 .< q2)
+
+oblique :: (SPitchPair , SPitchPair) -> SBool
+oblique ((p1, q1), (p2, q2)) =
+  (p1 .== p2 .&& q1 ./= q2) .||
+  (p1 ./= p2 .&& q1 .== q2)
 
 checkMotionPair :: (SPitchPair , SPitchPair) -> SBool
 checkMotionPair pps =
-  sNot (isPerfect (opi (snd pps)) .&& (parallel pps .|| similar pps))
+  sNot (isPerfect (opi (snd pps)) .&& similarOrParallel pps)
 
 checkMotion :: [SPitchPair] -> [SBool]
 checkMotion []  = []
