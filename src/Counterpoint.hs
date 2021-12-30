@@ -11,6 +11,7 @@ makeCounterpoint :: [SPitch] -> IO SatResult
 makeCounterpoint cantusFirmus = sat $ do
   ps <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
   let pairs = zip cantusFirmus ps :: [SPitchPair]
+  constrain $ numContrary pairs .>= 24
   solve $ firstSpecies pairs
 
 -- Assumes input length is at least 3
@@ -50,7 +51,6 @@ checkInterval pp = let o = opi pp in isConsonant o .&& sNot (isUnison o)
 parallel :: (SPitchPair , SPitchPair) -> SBool
 parallel ((p1, q1), (p2, q2)) = opi (p1, p2) .== opi (q1, q2) 
 
--- similar or parallel motion, except parallel motion where both notes stay the same
 similar :: (SPitchPair , SPitchPair) -> SBool
 similar pps@((p1, q1), (p2, q2)) =
   ((p1 .< p2 .&& q1 .< q2) .|| (p1 .> p2 .&& q1 .> q2))
@@ -77,6 +77,11 @@ checkMotionPair pps =
   sNot (isPerfect (opi (snd pps)) .&& similarOrParallel pps)
 
 checkMotion :: [SPitchPair] -> [SBool]
-checkMotion []  = []
-checkMotion (_ : []) = []
+checkMotion []                = []
+checkMotion (_ : [])          = []
 checkMotion (pp1 : pp2 : pps) = checkMotionPair (pp1, pp2) : checkMotion (pp2 : pps)
+
+numContrary :: [SPitchPair] -> SInteger
+numContrary []                = 0
+numContrary (_ : [])          = 0
+numContrary (pp1 : pp2 : pps) = (ite (contrary (pp1, pp2)) 1 0) + numContrary (pp2 : pps)
