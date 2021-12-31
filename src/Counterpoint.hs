@@ -12,6 +12,7 @@ makeCounterpoint cantusFirmus = sat $ do
   ps <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
   let pairs = zip cantusFirmus ps :: [SPitchPair]
   constrain $ numContrary pairs .>= 24
+  constrain $ sNot (repeatedNote ps)
   solve $ firstSpecies pairs
 
 -- Assumes input length is at least 3
@@ -85,3 +86,8 @@ numContrary :: [SPitchPair] -> SInteger
 numContrary []                = 0
 numContrary (_ : [])          = 0
 numContrary (pp1 : pp2 : pps) = (ite (contrary (pp1, pp2)) 1 0) + numContrary (pp2 : pps)
+
+repeatedNote :: [SPitch] -> SBool
+repeatedNote []             = sFalse
+repeatedNote (_ : [])       = sFalse
+repeatedNote (p1 : p2 : ps) = ite (p1 .== p2) sTrue (repeatedNote (p2 :ps))
