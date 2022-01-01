@@ -56,7 +56,10 @@ isConsonant i =
   (i .== per5)  .||
   (i .== min6)  .||
   (i .== maj6)  .||
-  (i .== per8)
+  (i .== per8)  .||
+  (i .== min10) .||
+  (i .== maj10) .||
+  (i .== per12)
 --  where i = intervalWithinOctave iv
 
 isDissonant :: PI -> SBool
@@ -67,7 +70,8 @@ isPerfect i =
   (i .== per1)  .||
   (i .== per4)  .||
   (i .== per5)  .||
-  (i .== per8)
+  (i .== per8)  .||
+  (i .== per12)
 --  where i = intervalWithinOctave iv
 
 isUnison :: PI -> SBool
@@ -81,3 +85,8 @@ isStep :: PI -> SBool
 isStep i =
   (i .== min2)  .||
   (i .== maj2)
+
+-- For now say a leap is a perfect 5th or greater
+isLeap :: PI -> SBool
+isLeap i = (i .>= per5)
+

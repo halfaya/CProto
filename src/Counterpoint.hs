@@ -11,8 +11,9 @@ makeCounterpoint :: [SPitch] -> IO SatResult
 makeCounterpoint cantusFirmus = sat $ do
   ps <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
   let pairs = zip cantusFirmus ps :: [SPitchPair]
-  constrain $ numContrary pairs .>= 24
   constrain $ sNot (repeatedNote ps)
+  constrain $ numContrary pairs .>= 30
+  constrain $ (numLeaps ps) .<= 3
   solve $ firstSpecies pairs
 
 -- Assumes input length is at least 3
@@ -90,4 +91,9 @@ numContrary (pp1 : pp2 : pps) = (ite (contrary (pp1, pp2)) 1 0) + numContrary (p
 repeatedNote :: [SPitch] -> SBool
 repeatedNote []             = sFalse
 repeatedNote (_ : [])       = sFalse
-repeatedNote (p1 : p2 : ps) = ite (p1 .== p2) sTrue (repeatedNote (p2 :ps))
+repeatedNote (p1 : p2 : ps) = ite (p1 .== p2) sTrue (repeatedNote (p2 : ps))
+
+numLeaps :: [SPitch] -> SInteger
+numLeaps []             = 0
+numLeaps (_ : [])       = 0
+numLeaps (p1 : p2 : ps) = (ite (isLeap (upi (p1, p2))) 1 0) + (numLeaps (p2 : ps))
