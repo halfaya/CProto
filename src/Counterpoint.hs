@@ -32,6 +32,44 @@ firstSpecies pps =
       endOk = checkEnd end
   in startOk ++ intervalsOk ++ motionOk ++ endOk ++ scaleOk
 
+makeCounterpoint2 :: [SPitch] -> IO SatResult
+makeCounterpoint2 cantusFirmus = sat $ do
+  ps1 <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
+  ps2 <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
+  let first  = zip cantusFirmus ps1 :: [SPitchPair]
+  let beats  = zip ps1 ps2 :: [SPitchPair]
+  let second = zip cantusFirmus beats :: [(SPitch, SPitchPair)]
+  constrain $ sNot (repeatedNote ps1)
+  constrain $ numContrary first .>= 30
+  constrain $ (numLeaps ps1) .<= 3
+  constrain $ between beats
+  solve $ firstSpecies first
+
+between :: [SPitchPair] -> SBool
+between []                   = sTrue
+between (_     : [])         = sTrue
+between ((a,b) : (c,d) : xs) =
+  ((a .<= b .&& b .<= c) .|| (a .>= b .&& b .>= c))
+  .&& between ((c,d) : xs)
+
+-- Assumes input length is at least 3
+-- Cantus firmus is first pair; counterpoint is always higher.
+secondSpecies :: [SPitchPair] -> [SBool]
+secondSpecies pps =
+  let start  = head pps
+      middle = tail (init pps)
+      end    = (last middle , last pps)
+
+      scaleOk = map (inScale majorScale . snd) pps 
+  
+      startOk = checkStart start
+      intervalsOk = map checkInterval middle
+      motionOk = checkMotion pps
+      endOk = checkEnd end
+  in startOk ++ intervalsOk ++ motionOk ++ endOk ++ scaleOk
+
+-------------------------------------------------------------------------------------
+
 -- Counterpoint must be a unison, perfect 5th or perfect octave above cantus firmus.
 checkStart :: SPitchPair -> [SBool]
 checkStart pp =
