@@ -54,7 +54,7 @@ yamanoteTrack :: MidiTrack
 yamanoteTrack = MidiTrack "Cantus Firmus" piano channel1 tempo (pitchesToMessages eighth yVelocity yamanote)
 
 midiFilename :: String
-midiFilename = "/Users/leo/Downloads/test.mid"
+midiFilename = "/Users/leo/Music/MusicTools/test.mid"
 
 main1 :: IO ()
 main1 = do
@@ -73,4 +73,4 @@ main2 = do
   putStrLn $ show $ getPitches2 res
 
 main :: IO ()
-main = main2
+main = main1

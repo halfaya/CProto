@@ -13,7 +13,7 @@ makeCounterpoint cantusFirmus = sat $ do
   let pairs = zip cantusFirmus ps :: [SPitchPair]
   constrain $ sNot (repeatedNote ps)
   constrain $ numContrary pairs .>= 30
-  constrain $ (numLeaps ps) .<= 3
+  constrain $ (numLeaps ps) .== 12
   solve $ firstSpecies pairs
 
 -- Assumes input length is at least 3
@@ -39,11 +39,12 @@ makeCounterpoint2 cantusFirmus = sat $ do
   let first  = zip cantusFirmus ps1 :: [SPitchPair]
   let beats  = zip ps1 ps2 :: [SPitchPair]
   let second = zip cantusFirmus beats :: [(SPitch, SPitchPair)]
-  constrain $ sNot (repeatedNote ps1)
-  constrain $ numContrary first .>= 30
-  constrain $ (numLeaps ps1) .<= 3
+--  constrain $ sNot (repeatedNote ps1)
+--  constrain $ numContrary first .>= 30
+--  constrain $ (numLeaps ps1) .<= 3
+  constrain $ sAnd (map (inScale majorScale) ps2)
   constrain $ between beats
-  solve $ firstSpecies first
+  solve $ secondSpecies first
 
 between :: [SPitchPair] -> SBool
 between []                   = sTrue
@@ -65,8 +66,8 @@ secondSpecies pps =
       startOk = checkStart start
       intervalsOk = map checkInterval middle
       motionOk = checkMotion pps
-      endOk = checkEnd end
-  in startOk ++ intervalsOk ++ motionOk ++ endOk ++ scaleOk
+      endOk = checkEnd2 end
+  in startOk ++ intervalsOk ++ motionOk ++ scaleOk ++ endOk
 
 -------------------------------------------------------------------------------------
 
@@ -83,6 +84,15 @@ checkEnd ((p1, q1), (p2, q2)) =
   let c1 = opi (p2, q2) .== per8 -- counterpoint ends a perfect octave above the cantus firmus
       c2 = opi (p1, p2) .== min2 .&& opi (q2, q1) .== maj2 -- cf half step up and cp full step down
       c3 = opi (p2, p1) .== maj2 .&& opi (q1, q2) .== min2 -- cf full step up and cp half step down
+  in c1 : (c2 .|| c3): []
+
+-- Note that the cantus firmus must end by a half step up or full step down.
+-- If this is not satisfied the generation of counterpoint will fail.
+checkEnd2 :: (SPitchPair , SPitchPair) -> [SBool]
+checkEnd2 ((p1, q1), (p2, q2)) =
+  let c1 = opi (p2, q2) .== per8 -- counterpoint ends a perfect octave above the cantus firmus
+      c2 = opi (p1, p2) .== min3 .&& opi (q2, q1) .== maj2 -- cf half step up and cp full step down
+      c3 = opi (p2, p1) .== maj2 .&& opi (q1, q2) .== min3 -- cf full step up and cp half step down
   in c1 : (c2 .|| c3): []
 
 checkInterval :: SPitchPair -> SBool

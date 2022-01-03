@@ -77,16 +77,21 @@ isPerfect i =
 isUnison :: PI -> SBool
 isUnison i = i .== per1
 
+-- Half or whole step.
+isStep :: PI -> SBool
+isStep i = (i .== min2) .|| (i .== maj2)
+
 isThird :: PI -> SBool
 isThird i = (i .== min3) .|| (i .== maj3)
 
--- Half or whole step.
-isStep :: PI -> SBool
-isStep i =
-  (i .== min2)  .||
-  (i .== maj2)
-
--- For now say a leap is a perfect 5th or greater
 isLeap :: PI -> SBool
-isLeap i = (i .>= per5)
+isLeap i = (i .>= per4)
 
+isPassing :: SPitch -> SPitch -> SPitch -> SBool
+isPassing a b c =
+  let i = opi (a , b)
+      j = opi (b , c)
+  in (isStep    i  .&& isStep    j) .||
+     (isStep (- i) .&& isStep (- j))
+  
+  
