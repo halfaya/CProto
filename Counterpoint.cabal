@@ -15,5 +15,5 @@ executable Counterpoint
   hs-source-dirs:   src
   main-is:          Main.hs
   build-depends:    base ^>=4.15.0.0, sbv, containers, HCodecs
-  other-modules:    Pitch, Interval, Yamanote, Midi
+  other-modules:    Pitch, Interval, Counterpoint, Yamanote, Frog, Midi
   default-language: Haskell2010

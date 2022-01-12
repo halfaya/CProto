@@ -12,6 +12,7 @@ import Midi
 import Pitch
 import Interval
 import Yamanote
+import Frog
 
 cvsToInt8s :: [CV] -> [Int8]
 cvsToInt8s [] = []
@@ -43,6 +44,8 @@ tempo = 120
 yVelocity = 60
 cVelocity = 60
 
+fVelocity = 60
+
 channel1 = 0
 channel2 = 1
 
@@ -53,8 +56,12 @@ sixteenth    = 1 -- a 16th note is one tick
 yamanoteTrack :: MidiTrack
 yamanoteTrack = MidiTrack "Cantus Firmus" piano channel1 tempo (pitchesToMessages eighth yVelocity yamanote)
 
+frogTrack :: MidiTrack
+frogTrack = MidiTrack "Cantus Firmus" piano channel1 tempo (pitchesToMessages eighth fVelocity frog)
+
 midiFilename :: String
-midiFilename = "/Users/leo/Music/MusicTools/test.mid"
+-- midiFilename = "/Users/leo/Music/MusicTools/test.mid"
+midiFilename = "/Users/youyoucong/Music/MusicTools/test.mid"
 
 main1 :: IO ()
 main1 = do
@@ -72,5 +79,13 @@ main2 = do
   exportTracks midiFilename ticksPerBeat ycpTracks
   putStrLn $ show $ getPitches2 res
 
+main3 :: IO ()
+main3 = do
+  res <- makeCounterpoint fCantusFirmus
+  let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages eighth cVelocity (getPitches res))
+  let fcpTracks = cpTrack : frogTrack : []
+  exportTracks midiFilename ticksPerBeat fcpTracks
+  putStrLn $ show $ getPitches res
+
 main :: IO ()
-main = main1
+main = main3
