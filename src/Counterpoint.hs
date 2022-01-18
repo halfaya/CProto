@@ -2,13 +2,22 @@
 
 module Counterpoint where
 
+import Data.Map (toList)
 import Data.SBV
+import Data.SBV.Internals (CV)
+import GHC.Exts (sortWith)
 
 import Pitch
 import Interval
 
-makeCounterpoint :: [SPitch] -> IO SatResult
-makeCounterpoint cantusFirmus = sat $ do
+data Species = First | Second
+
+makeCounterpoint :: Species -> [SPitch] -> IO SatResult
+makeCounterpoint First  = makeCounterpoint1
+makeCounterpoint Second = makeCounterpoint2
+
+makeCounterpoint1 :: [SPitch] -> IO SatResult
+makeCounterpoint1 cantusFirmus = sat $ do
   ps <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
   let pairs = zip cantusFirmus ps :: [SPitchPair]
   constrain $ sNot (repeatedNote ps)
@@ -68,6 +77,36 @@ secondSpecies pps =
       motionOk = checkMotion pps
       endOk = checkEnd2 end
   in startOk ++ intervalsOk ++ motionOk ++ scaleOk ++ endOk
+
+-------------------------------------------------------------------------------------
+
+cvsToInt8s :: [CV] -> [Int8]
+cvsToInt8s [] = []
+cvsToInt8s cvs = case parseCVs cvs of
+  Nothing         -> []
+  Just (w , cvs') -> w : cvsToInt8s cvs'
+
+-- Expects variables to be of the form s0, s1, etc., so remove the "s" and sort via integer value.
+getPitches1 :: SatResult -> [Pitch]
+getPitches1 res = map fromIntegral (cvsToInt8s $ map snd (sortWith (r . tail . fst) (toList (getModelDictionary res))))
+  where r :: String -> Int
+        r = read
+
+-- Expects variables to be of the form s0, s1, etc., so remove the "s" and sort via integer value.
+-- Expects all strong beats first, followed by all weak beats. Last weak beat is superfluous so drop it.
+getPitches2 :: SatResult -> [Pitch]
+getPitches2 res = init1 $ interleave $ map fromIntegral (cvsToInt8s $ map snd (sortWith (r . tail . fst) (toList (getModelDictionary res))))
+  where r :: String -> Int
+        r = read
+        interleave :: [Pitch] -> [Pitch] -- interleave first and second halves of a list
+        interleave xs = foldr (\(a,b) cs -> a : b : cs) [] ((uncurry zip) (splitAt (length xs `div` 2) xs))
+        init1 :: [a] -> [a]
+        init1 [] = []
+        init1 xs = init xs
+
+getPitches :: Species -> SatResult -> [Pitch]
+getPitches First  = getPitches1
+getPitches Second = getPitches2
 
 -------------------------------------------------------------------------------------
 
