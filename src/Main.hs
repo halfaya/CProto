@@ -6,6 +6,7 @@ import Data.Map (toList)
 import Data.SBV
 import Data.SBV.Internals (CV)
 import GHC.Exts (sortWith)
+import System.Directory (getHomeDirectory)
 
 import Counterpoint
 import Midi
@@ -41,10 +42,8 @@ getPitches2 res = init1 $ interleave $ map fromIntegral (cvsToInt8s $ map snd (s
 tempo :: Int
 tempo = 120
 
-yVelocity = 60
-cVelocity = 60
-
-fVelocity = 60
+cfVelocity = 60 -- velocity of cantus firmus
+cpVelocity = 60 -- velocity of counterpoint
 
 channel1 = 0
 channel2 = 1
@@ -53,39 +52,24 @@ ticksPerBeat = 4 -- 4 means a tick is a 16th note
 eighth       = 2 -- an 8th note is two ticks
 sixteenth    = 1 -- a 16th note is one tick
 
-yamanoteTrack :: MidiTrack
-yamanoteTrack = MidiTrack "Cantus Firmus" piano channel1 tempo (pitchesToMessages eighth yVelocity yamanote)
+cantusFirmusTrack :: [Pitch] -> MidiTrack
+cantusFirmusTrack cantusFirmus = MidiTrack "Cantus Firmus" piano channel1 tempo (pitchesToMessages eighth cfVelocity cantusFirmus)
 
-frogTrack :: MidiTrack
-frogTrack = MidiTrack "Cantus Firmus" piano channel1 tempo (pitchesToMessages eighth fVelocity frog)
+midiFilenameRelativePath :: String
+midiFilenameRelativePath = "/Music/MusicTools/test.mid"
 
-midiFilename :: String
--- midiFilename = "/Users/leo/Music/MusicTools/test.mid"
-midiFilename = "/Users/youyoucong/Music/MusicTools/test.mid"
+getMidiFilename :: IO String
+getMidiFilename = fmap (++ midiFilenameRelativePath) getHomeDirectory
 
-main1 :: IO ()
-main1 = do
-  res <- makeCounterpoint cantusFirmus
-  let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages eighth cVelocity (getPitches res))
-  let ycpTracks = cpTrack : yamanoteTrack : []
-  exportTracks midiFilename ticksPerBeat ycpTracks
-  putStrLn $ show $ getPitches res
-
-main2 :: IO ()
-main2 = do
-  res <- makeCounterpoint2 cantusFirmus
-  let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages sixteenth cVelocity (getPitches2 res))
-  let ycpTracks = cpTrack : yamanoteTrack : []
-  exportTracks midiFilename ticksPerBeat ycpTracks
-  putStrLn $ show $ getPitches2 res
-
-main3 :: IO ()
-main3 = do
-  res <- makeCounterpoint fCantusFirmus
-  let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages eighth cVelocity (getPitches res))
-  let fcpTracks = cpTrack : frogTrack : []
+generateCounterpoint :: [Pitch] -> (SatResult -> [Pitch]) -> IO ()
+generateCounterpoint cantusFirmus satToCounterpoint = do
+  let cfTrack = cantusFirmusTrack cantusFirmus
+  res <- makeCounterpoint (map literal cantusFirmus)
+  let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages eighth cpVelocity (satToCounterpoint res))
+  let fcpTracks = cpTrack : cfTrack : []
+  midiFilename <- getMidiFilename
   exportTracks midiFilename ticksPerBeat fcpTracks
   putStrLn $ show $ getPitches res
 
 main :: IO ()
-main = main3
+main = generateCounterpoint frog getPitches
