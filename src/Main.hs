@@ -50,4 +50,4 @@ generateCounterpoint species cantusFirmus = do
   putStrLn $ show $ cpPitches
 
 main :: IO ()
-main = generateCounterpoint Second frog
+main = generateCounterpoint Second yamanote

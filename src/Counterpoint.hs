@@ -18,11 +18,11 @@ makeCounterpoint Second = makeCounterpoint2
 
 makeCounterpoint1 :: [SPitch] -> IO SatResult
 makeCounterpoint1 cantusFirmus = sat $ do
-  ps <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
-  let pairs = zip cantusFirmus ps :: [SPitchPair]
-  constrain $ sNot (repeatedNote ps)
+  cp <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
+  let pairs = zip cantusFirmus cp :: [SPitchPair]
+  constrain $ sNot (repeatedNote cp)
   constrain $ numContrary pairs .>= 4 -- 30
-  constrain $ (numLeaps ps) .== 1 -- 12
+  constrain $ (numLeaps cp) .== 1 -- 12
   solve $ firstSpecies pairs
 
 -- Assumes input length is at least 3
@@ -43,23 +43,22 @@ firstSpecies pps =
 
 makeCounterpoint2 :: [SPitch] -> IO SatResult
 makeCounterpoint2 cantusFirmus = sat $ do
-  ps1 <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
-  ps2 <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
-  let first  = zip cantusFirmus ps1 :: [SPitchPair]
-  let beats  = zip ps1 ps2 :: [SPitchPair]
-  let second = zip cantusFirmus beats :: [(SPitch, SPitchPair)]
---  constrain $ sNot (repeatedNote ps1)
---  constrain $ numContrary first .>= 30
---  constrain $ (numLeaps ps1) .<= 3
-  constrain $ sAnd (map (inScale majorScale) ps2)
-  constrain $ between beats
-  solve $ secondSpecies first
+  cpStrong <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
+  cpWeak <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
+  let strong  = zip cantusFirmus cpStrong :: [SPitchPair]
+  let cp  = zip cpStrong cpWeak :: [SPitchPair]
+--  let cpFlat = catPairs cp :: [SPitch]
+  let second = zip cantusFirmus cp :: [(SPitch, SPitchPair)]
+--  constrain $ sNot (repeatedNote cpFlat)
+  constrain $ numFalse (map (inScale majorScale) cpWeak) .<= 1
+  constrain $ between cp
+  solve $ secondSpecies strong
 
 between :: [SPitchPair] -> SBool
 between []                   = sTrue
 between (_     : [])         = sTrue
 between ((a,b) : (c,d) : xs) =
-  ((a .<= b .&& b .<= c) .|| (a .>= b .&& b .>= c))
+  ((a .< b .&& b .< c) .|| (a .> b .&& b .> c))
   .&& between ((c,d) : xs)
 
 -- Assumes input length is at least 3
@@ -79,6 +78,10 @@ secondSpecies pps =
   in startOk ++ intervalsOk ++ motionOk ++ scaleOk ++ endOk
 
 -------------------------------------------------------------------------------------
+
+catPairs :: [(a,a)] -> [a]
+catPairs []            = []
+catPairs ((x,y) : xys) = x : y : catPairs xys
 
 cvsToInt8s :: [CV] -> [Int8]
 cvsToInt8s [] = []
@@ -184,3 +187,9 @@ numLeaps :: [SPitch] -> SInteger
 numLeaps []             = 0
 numLeaps (_ : [])       = 0
 numLeaps (p1 : p2 : ps) = (ite (isLeap (upi (p1, p2))) 1 0) + (numLeaps (p2 : ps))
+
+numTrue :: [SBool] -> SInteger
+numTrue xs = sum $ (map (\x -> ite x 1 0)) xs
+
+numFalse :: [SBool] -> SInteger
+numFalse xs = sum $ (map (\x -> ite x 0 1)) xs
