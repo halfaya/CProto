@@ -5,13 +5,14 @@ module Pitch where
 import Data.SBV
 
 type Pitch      = Int8
-type PitchClass = Int8    -- must be between 0 and 11 inclusive
-type Octave     = Int8    -- C5 = middle C for Midi
-type Scale      = [Pitch] -- assume all values in [0,11]
+type PitchClass = Int8         -- must be between 0 and 11 inclusive
+type Octave     = Int8         -- C5 = middle C for Midi
+type Scale      = [PitchClass]
 
-type SPitch     = SInt8
-type SPitchPair = (SPitch, SPitch)
-type SScale     = [SPitch] -- assume all values in [0,11]
+type SPitch      = SInt8
+type SPitchClass = SInt8    -- must be between 0 and 11 inclusive
+type SPitchPair  = (SPitch, SPitch)
+type SScale      = [SPitchClass]
 
 standardMidiPitch :: PitchClass -> Octave -> Pitch
 standardMidiPitch p o = o * 12 + p
