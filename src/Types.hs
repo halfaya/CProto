@@ -4,77 +4,42 @@ module Types where
 
 import Data.Maybe (catMaybes)
 
-data Pitch where
-  Pitch :: Int -> Pitch
-  deriving Show
+import Pitch
+import Interval
 
-type PitchPair = (Pitch, Pitch)
-
--- OPI
-data Interval where
-  Interval :: Int -> Interval
-  deriving (Show, Eq)
-
-pitchPairInterval :: PitchPair -> Interval
-pitchPairInterval (Pitch a , Pitch b) =
+pitchPairOpi :: PitchPair -> Opi
+pitchPairOpi (a , b) =
   let n = b - a
-  in Interval (if n > 12 then n `mod` 12 else n)
+  in if n > 12 then n `mod` 12 else n
 
 data IntervalSet where
   ConsonantInterval :: IntervalSet
   deriving Show
 
-intervalSet :: IntervalSet -> [Interval]
+intervalSet :: IntervalSet -> [Opi]
 intervalSet ConsonantInterval =
-  [Interval 0,  -- perfect unison
-   Interval 3,  -- minor third
-   Interval 4,  -- major third
-   Interval 7,  -- perfect fifth
-   Interval 8,  -- minor sixth
-   Interval 9,  -- major sixth
-   Interval 12] -- perfect octave
+  [0,  -- perfect unison
+   3,  -- minor third
+   4,  -- major third
+   7,  -- perfect fifth
+   8,  -- minor sixth
+   9,  -- major sixth
+   12] -- perfect octave
 
-type IntervalPair = (Interval, Interval)
-
-data Music where
-  MPitch :: Pitch -> Music
-  MInterval :: Pitch -> Music
-  Pair :: Music -> Music -> Music
-
-data Constraint where
-  IntervalInSet :: IntervalSet -> Interval -> Constraint
+data IntervalConstraint where
+  IntervalInSet :: IntervalSet -> IntervalConstraint
   deriving Show
 
 data Error where
-  ConstraintFail :: Constraint -> Error
+  IntervalConstraintError :: IntervalConstraint -> Error
   deriving Show
 
-firstSpecies :: [PitchPair] -> [Constraint]
-firstSpecies = map (IntervalInSet ConsonantInterval . pitchPairInterval)
+firstSpecies :: IntervalConstraint
+firstSpecies = IntervalInSet ConsonantInterval
 
-check :: Constraint -> Maybe Error
-check c@(IntervalInSet s i) = let x = intervalSet s in
-  if i `elem` x then Nothing else Just (ConstraintFail c)
-
-type PitchClass = Int
-type Octave     = Int
-
-standardMidiPitch :: PitchClass -> Octave -> Pitch
-standardMidiPitch p o = Pitch (o * 12 + p)
-
-c :: Octave -> Pitch -- etc
-c  = standardMidiPitch 0
-db = standardMidiPitch 1
-d  = standardMidiPitch 2
-eb = standardMidiPitch 3
-e  = standardMidiPitch 4
-f  = standardMidiPitch 5
-gb = standardMidiPitch 6
-g  = standardMidiPitch 7
-ab = standardMidiPitch 8
-a  = standardMidiPitch 9
-bb = standardMidiPitch 10
-b  = standardMidiPitch 11
+checkInterval :: IntervalConstraint -> Opi -> Maybe Error
+checkInterval c@(IntervalInSet s) i = let x = intervalSet s in
+  if i `elem` x then Nothing else Just (IntervalConstraintError c)
 
 scarlatti :: [PitchPair]
 scarlatti =
@@ -95,4 +60,4 @@ scarlatti =
    (e 4 , b 5) ,
    (a 4 , a 5) ]
 
-test = catMaybes (map check (firstSpecies scarlatti))
+test = catMaybes (map (checkInterval firstSpecies . pitchPairOpi) scarlatti)

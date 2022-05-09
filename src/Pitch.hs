@@ -6,6 +6,7 @@ import Data.SBV
 
 type Pitch      = Int8
 type PitchClass = Int8         -- must be between 0 and 11 inclusive
+type PitchPair  = (Pitch, Pitch)
 type Octave     = Int8         -- C5 = middle C for Midi
 type Scale      = [PitchClass]
 

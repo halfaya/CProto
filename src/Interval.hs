@@ -12,13 +12,10 @@ type Upi  = Int8  -- should be non-negative
 type SUpi = SInt8 -- should be non-negative
 
 -- Ordered pitch interval
--- Relative distance in semitones between two pitches.
-type Opi  = Int8
-type SOpi = SInt8
-
--- Either Upi or Opi
-type PI  = Int8
-type SPI = SInt8
+-- Signed distance in semitones between two pitches.
+type Opi     = Int8
+type SOpi    = SInt8
+type OpiPair = (Opi, Opi)
 
 upi :: SPitchPair -> SUpi
 upi (p1 , p2) = ite (p1 .< p2) (p2 - p1) (p1 - p2)
@@ -51,7 +48,7 @@ per12 = 19
 intervalWithinOctave :: SUpi -> SUpi
 intervalWithinOctave i = i `sMod` 12
 
-isConsonant :: SPI -> SBool
+isConsonant :: SOpi -> SBool
 isConsonant i =
   (i .== per1)  .||
   (i .== min3)  .||
@@ -65,10 +62,10 @@ isConsonant i =
   (i .== per12)
 --  where i = intervalWithinOctave iv
 
-isDissonant :: SPI -> SBool
+isDissonant :: SOpi -> SBool
 isDissonant = sNot . isConsonant
 
-isPerfect :: SPI -> SBool
+isPerfect :: SOpi -> SBool
 isPerfect i =
   (i .== per1)  .||
   (i .== per4)  .||
@@ -77,17 +74,17 @@ isPerfect i =
   (i .== per12)
 --  where i = intervalWithinOctave iv
 
-isUnison :: SPI -> SBool
+isUnison :: SOpi -> SBool
 isUnison i = i .== per1
 
 -- Half or whole step.
-isStep :: SPI -> SBool
+isStep :: SOpi -> SBool
 isStep i = (i .== min2) .|| (i .== maj2)
 
-isThird :: SPI -> SBool
+isThird :: SOpi -> SBool
 isThird i = (i .== min3) .|| (i .== maj3)
 
-isLeap :: SPI -> SBool
+isLeap :: SOpi -> SBool
 isLeap i = (i .>= per4)
 
 isPassing :: SPitch -> SPitch -> SPitch -> SBool
