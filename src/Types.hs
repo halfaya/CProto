@@ -39,7 +39,7 @@ firstSpecies = IntervalInSet ConsonantInterval
 
 checkInterval :: IntervalConstraint -> Opi -> Maybe Error
 checkInterval c@(IntervalInSet s) i = let x = intervalSet s in
-  if i `elem` x then Nothing else Just (IntervalConstraintError c)
+  if isConsonant i then Nothing else Just (IntervalConstraintError c)
 
 scarlatti :: [PitchPair]
 scarlatti =
