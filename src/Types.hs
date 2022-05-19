@@ -6,6 +6,7 @@ import Data.Maybe (catMaybes)
 
 import Pitch
 import Interval
+import Motion
 
 pitchPairOpi :: PitchPair -> Opi
 pitchPairOpi (a , b) =
@@ -37,8 +38,8 @@ data Error where
 firstSpecies :: IntervalConstraint
 firstSpecies = IntervalInSet ConsonantInterval
 
-checkInterval :: IntervalConstraint -> Opi -> Maybe Error
-checkInterval c@(IntervalInSet s) i = let x = intervalSet s in
+checkInterval2 :: IntervalConstraint -> Opi -> Maybe Error
+checkInterval2 c@(IntervalInSet s) i = let x = intervalSet s in
   if isConsonant i then Nothing else Just (IntervalConstraintError c)
 
 scarlatti :: [PitchPair]
@@ -60,4 +61,23 @@ scarlatti =
    (e 4 , b 5) ,
    (a 4 , a 5) ]
 
-test = catMaybes (map (checkInterval firstSpecies . pitchPairOpi) scarlatti)
+beethoven146 :: [PitchPair]
+beethoven146 =
+  [(g 5 , c 6) ,
+   (c 6 , e 6) ,
+   (b 5 , g 6) ,
+   (a 5 , f 6) ,
+   (g 5 , e 6) ,
+   (f 5 , c 6) ,
+   (a 5 , a 6) ,
+   (c 6 , f 6) ,
+   (b 5, g 6) ,
+   (g 5, e 6) ,
+   (g 5, d 6) ,
+   (g 5, c 6) ]
+
+test = catMaybes (map (checkInterval2 firstSpecies . pitchPairOpi) scarlatti)
+
+testm :: [Bool]
+testm = checkMotion beethoven146
+

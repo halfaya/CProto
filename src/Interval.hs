@@ -2,6 +2,7 @@
 
 module Interval where
 
+import Prelude hiding ((==), (/=), (<=), (<), (>=), (>), not, (||), (&&))
 import Data.SBV
 
 import Pitch
@@ -16,13 +17,12 @@ type SUpi = SInt8 -- should be non-negative
 -- Signed distance in semitones between two pitches.
 type Opi     = Int8
 type SOpi    = SInt8
---type COpi    = IntC
 type OpiPair = (Opi, Opi)
 
 upi :: SPitchPair -> SUpi
 upi (p1 , p2) = ite (p1 .< p2) (p2 - p1) (p1 - p2)
 
-opi :: SPitchPair -> SOpi
+opi :: (Num a) => (a , a) -> a
 opi (p1 , p2) = p2 - p1
 
 data Interval =
@@ -75,62 +75,54 @@ ivs = literal . iv
 intervalWithinOctave :: SUpi -> SUpi
 intervalWithinOctave i = i `sMod` 12
 
-isConsonant :: (IntC b a, CastC a) => a -> b
+isConsonant :: (IntC b a, FromInt8 a) => a -> b
 isConsonant i =
-  (i ^== f Per1)  ^||
-  (i ^== f Min3)  ^||
-  (i ^== f Maj3)  ^||
-  (i ^== f Per5)  ^||
-  (i ^== f Min6)  ^||
-  (i ^== f Maj6)  ^||
-  (i ^== f Per8)  ^||
-  (i ^== f Min10) ^||
-  (i ^== f Maj10) ^||
-  (i ^== f Per12)
-  where f = cast . iv
+  (i == f Per1)  ||
+  (i == f Min3)  ||
+  (i == f Maj3)  ||
+  (i == f Per5)  ||
+  (i == f Min6)  ||
+  (i == f Maj6)  ||
+  (i == f Per8)  ||
+  (i == f Min10) ||
+  (i == f Maj10) ||
+  (i == f Per12)
+  where f = fromInt8 . iv
 
-isConsonant2 :: SOpi -> SBool
-isConsonant2 i =
-  (i .== ivs Per1)  .||
-  (i .== ivs Min3)  .||
-  (i .== ivs Maj3)  .||
-  (i .== ivs Per5)  .||
-  (i .== ivs Min6)  .||
-  (i .== ivs Maj6)  .||
-  (i .== ivs Per8)  .||
-  (i .== ivs Min10) .||
-  (i .== ivs Maj10) .||
-  (i .== ivs Per12)
---  where i = intervalWithinOctave
+isDissonant :: (IntC b a, FromInt8 a) => a -> b
+isDissonant = not . isConsonant
 
-isDissonant :: SOpi -> SBool
-isDissonant = sNot . isConsonant
-
-isPerfect :: SOpi -> SBool
+isPerfect :: (IntC b a, FromInt8 a) => a -> b
 isPerfect i =
-  (i .== ivs Per1)  .||
-  (i .== ivs Per4)  .||
-  (i .== ivs Per5)  .||
-  (i .== ivs Per8)  .||
-  (i .== ivs Per12)
---  where i = intervalWithinOctave
+  (i == f Per1)  ||
+  (i == f Per4)  ||
+  (i == f Per5)  ||
+  (i == f Per8)  ||
+  (i == f Per12)
+  where f = fromInt8 . iv
 
-isUnison :: SOpi -> SBool
-isUnison i = i .== (ivs Per1)
+isUnison :: (IntC b a, FromInt8 a) => a -> b
+isUnison i = i == (f Per1)
+  where f = fromInt8 . iv
 
 -- Half or whole step.
-isStep :: SOpi -> SBool
-isStep i = (i .== ivs Min2) .|| (i .== ivs Maj2)
+isStep :: (IntC b a, FromInt8 a) => a -> b
+isStep i = (i == f Min2) || (i == f Maj2)
+  where f = fromInt8 . iv
 
-isThird :: SOpi -> SBool
-isThird i = (i .== ivs Min3) .|| (i .== ivs Maj3)
+isThird :: (IntC b a, FromInt8 a) => a -> b
+isThird i = (i == f Min3) || (i == f Maj3)
+  where f = fromInt8 . iv
 
-isLeap :: SOpi -> SBool
-isLeap i = (i .>= ivs Per4)
+isLeap :: (IntC b a, FromInt8 a) => a -> b
+isLeap i = (i >= f Per4)
+  where f = fromInt8 . iv
 
+{-
 isPassing :: SPitch -> SPitch -> SPitch -> SBool
 isPassing a b c =
   let i = opi (a , b)
       j = opi (b , c)
-  in (isStep    i  .&& isStep    j) .||
-     (isStep (- i) .&& isStep (- j))
+  in (isStep    i  && isStep    j) ||
+     (isStep (- i) && isStep (- j))
+-}
