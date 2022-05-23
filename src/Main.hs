@@ -5,7 +5,7 @@ module Main where
 import Data.SBV
 import System.Directory (getHomeDirectory)
 
-import Counterpoint
+--import Counterpoint
 import Midi
 import Pitch
 import Interval
@@ -25,6 +25,7 @@ ticksPerBeat = 4 -- 4 means a tick is a 16th note
 eighth       = 2 -- an 8th note is two ticks
 sixteenth    = 1 -- a 16th note is one tick
 
+{-
 noteLength :: Species -> Int
 noteLength First  = eighth
 noteLength Second = sixteenth
@@ -48,6 +49,8 @@ generateCounterpoint species cantusFirmus = do
   midiFilename <- getMidiFilename
   exportTracks midiFilename ticksPerBeat fcpTracks
   putStrLn $ show $ cpPitches
+-}
 
 main :: IO ()
-main = generateCounterpoint Second yamanote
+--main = generateCounterpoint Second yamanote
+main = putStrLn "hello"

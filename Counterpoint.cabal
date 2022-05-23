@@ -14,6 +14,6 @@ extra-source-files: CHANGELOG.md README.md
 executable Counterpoint
   hs-source-dirs:   src
   main-is:          Main.hs
-  build-depends:    base ^>=4.15.0.0, sbv, containers, HCodecs, directory
-  other-modules:    Pitch, Interval, Counterpoint, Yamanote, Frog, Midi
+  build-depends:    base ^>=4.16.0.0, sbv, containers, HCodecs, directory, split
+  other-modules:    Pitch, Interval, Class, Frog, Yamanote, Midi, Motion, Types
   default-language: Haskell2010

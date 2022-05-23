@@ -2,7 +2,9 @@
 
 module Types where
 
+import Data.List.Split (splitOn)
 import Data.Maybe (catMaybes)
+import Data.SBV
 
 import Pitch
 import Interval
@@ -80,4 +82,24 @@ test = catMaybes (map (checkInterval2 firstSpecies . pitchPairOpi) scarlatti)
 
 testm :: [Bool]
 testm = checkMotion beethoven146
+
+tests :: IO SatResult
+tests = sat $ do
+  let cf = map literal [c 6, e 6]
+  cp1 <- free "0_1" :: Symbolic SInt8
+  let cp = [literal (g 5), cp1]
+  let music = zip cp cf
+  solve $ checkMotion music
+
+toFreeName :: Int -> Int -> String
+toFreeName voice position = show voice ++ "_" ++ show position
+
+--fromFreeName :: String -> (Int, Int)
+--fromFreeName voice position = show voice ++ "_" ++ show position
+
+t :: IO ()
+t = do
+  res <- tests
+  let x = getModelValue "0_1" res :: Maybe Int8
+  putStrLn (show x)  
 
