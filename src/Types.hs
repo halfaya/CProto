@@ -91,11 +91,13 @@ tests = sat $ do
   let music = zip cp cf
   solve $ checkMotion music
 
-toFreeName :: Int -> Int -> String
-toFreeName voice position = show voice ++ "_" ++ show position
+toFreeName :: (Int, Int) -> String
+toFreeName (voice, position) = show voice ++ "_" ++ show position
 
---fromFreeName :: String -> (Int, Int)
---fromFreeName voice position = show voice ++ "_" ++ show position
+fromFreeName :: String -> (Int, Int)
+fromFreeName s = case splitOn "_" s of
+  [v , p] -> (read v , read p)
+  _       -> (-1, -1)
 
 t :: IO ()
 t = do

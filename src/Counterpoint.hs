@@ -6,9 +6,11 @@ import Data.Map (toList)
 import Data.SBV
 import Data.SBV.Internals (CV)
 import GHC.Exts (sortWith)
+import Prelude hiding ((==), (/=), (<=), (<), (>=), (>), not, (||), (&&))
 
 import Pitch
 import Interval
+import Motion
 
 data Species = First | Second
 
@@ -47,9 +49,9 @@ makeCounterpoint2 cantusFirmus = sat $ do
   cpWeak <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
   let strong  = zip cantusFirmus cpStrong :: [SPitchPair]
   let cp  = zip cpStrong cpWeak :: [SPitchPair]
---  let cpFlat = catPairs cp :: [SPitch]
+  let cpFlat = catPairs cp :: [SPitch]
   let second = zip cantusFirmus cp :: [(SPitch, SPitchPair)]
---  constrain $ sNot (repeatedNote cpFlat)
+  constrain $ sNot (repeatedNote cpFlat)
   constrain $ numFalse (map (inScale majorScale) cpWeak) .<= 1
   constrain $ between cp
   solve $ secondSpecies strong
@@ -115,63 +117,27 @@ getPitches Second = getPitches2
 
 -- Counterpoint must be a unison, perfect 5th or perfect octave above cantus firmus.
 checkStart :: SPitchPair -> [SBool]
-checkStart pp =
-  let o = opi pp
-  in (o .== per1 .|| o .== per5 .|| o .== per8) : []
+checkStart pp = is158 (opi pp) : []
 
 -- Note that the cantus firmus must end by a half step up or full step down.
 -- If this is not satisfied the generation of counterpoint will fail.
 checkEnd :: (SPitchPair , SPitchPair) -> [SBool]
 checkEnd ((p1, q1), (p2, q2)) =
-  let c1 = opi (p2, q2) .== per8 -- counterpoint ends a perfect octave above the cantus firmus
-      c2 = opi (p1, p2) .== min2 .&& opi (q2, q1) .== maj2 -- cf half step up and cp full step down
-      c3 = opi (p2, p1) .== maj2 .&& opi (q1, q2) .== min2 -- cf full step up and cp half step down
+  let f = literal . iv
+      c1 = opi (p2, q2) .== f Per8 -- counterpoint ends a perfect octave above the cantus firmus
+      c2 = opi (p1, p2) .== f Min2 .&& opi (q2, q1) .== f Maj2 -- cf half step up and cp full step down
+      c3 = opi (p2, p1) .== f Maj2 .&& opi (q1, q2) .== f Min2 -- cf full step up and cp half step down
   in c1 : (c2 .|| c3): []
 
 -- Note that the cantus firmus must end by a half step up or full step down.
 -- If this is not satisfied the generation of counterpoint will fail.
 checkEnd2 :: (SPitchPair , SPitchPair) -> [SBool]
 checkEnd2 ((p1, q1), (p2, q2)) =
-  let c1 = opi (p2, q2) .== per8 -- counterpoint ends a perfect octave above the cantus firmus
-      c2 = opi (p1, p2) .== min3 .&& opi (q2, q1) .== maj2 -- cf half step up and cp full step down
-      c3 = opi (p2, p1) .== maj2 .&& opi (q1, q2) .== min3 -- cf full step up and cp half step down
+  let f = literal . iv
+      c1 = opi (p2, q2) .== f Per8 -- counterpoint ends a perfect octave above the cantus firmus
+      c2 = opi (p1, p2) .== f Min3 .&& opi (q2, q1) .== f Maj2 -- cf half step up and cp full step down
+      c3 = opi (p2, p1) .== f Maj2 .&& opi (q1, q2) .== f Min3 -- cf full step up and cp half step down
   in c1 : (c2 .|| c3): []
-
-checkInterval :: SPitchPair -> SBool
-checkInterval pp = let o = opi pp in isConsonant o .&& sNot (isUnison o)
-
-parallel :: (SPitchPair , SPitchPair) -> SBool
-parallel ((p1, q1), (p2, q2)) = opi (p1, p2) .== opi (q1, q2) 
-
-similar :: (SPitchPair , SPitchPair) -> SBool
-similar pps@((p1, q1), (p2, q2)) =
-  ((p1 .< p2 .&& q1 .< q2) .|| (p1 .> p2 .&& q1 .> q2))
-  .&& sNot (parallel pps)
-
-similarOrParallel :: (SPitchPair , SPitchPair) -> SBool
-similarOrParallel ((p1, q1), (p2, q2)) =
-  (p1 .< p2 .&& q1 .< q2) .||
-  (p1 .> p2 .&& q1 .> q2) .||
-  (p1 .== p2 .&& q1 .== q2)
-
-contrary :: (SPitchPair , SPitchPair) -> SBool
-contrary ((p1, q1), (p2, q2)) =
-  (p1 .< p2 .&& q1 .> q2) .||
-  (p1 .> p2 .&& q1 .< q2)
-
-oblique :: (SPitchPair , SPitchPair) -> SBool
-oblique ((p1, q1), (p2, q2)) =
-  (p1 .== p2 .&& q1 ./= q2) .||
-  (p1 ./= p2 .&& q1 .== q2)
-
-checkMotionPair :: (SPitchPair , SPitchPair) -> SBool
-checkMotionPair pps =
-  sNot (isPerfect (opi (snd pps)) .&& similarOrParallel pps)
-
-checkMotion :: [SPitchPair] -> [SBool]
-checkMotion []                = []
-checkMotion (_ : [])          = []
-checkMotion (pp1 : pp2 : pps) = checkMotionPair (pp1, pp2) : checkMotion (pp2 : pps)
 
 numContrary :: [SPitchPair] -> SInteger
 numContrary []                = 0
@@ -182,6 +148,9 @@ repeatedNote :: [SPitch] -> SBool
 repeatedNote []             = sFalse
 repeatedNote (_ : [])       = sFalse
 repeatedNote (p1 : p2 : ps) = ite (p1 .== p2) sTrue (repeatedNote (p2 : ps))
+
+upi :: SPitchPair -> SInt8
+upi (p1 , p2) = ite (p1 .< p2) (p2 - p1) (p1 - p2)
 
 numLeaps :: [SPitch] -> SInteger
 numLeaps []             = 0

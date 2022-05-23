@@ -8,26 +8,30 @@ import qualified Prelude as P
 import Data.SBV
 
 -- A boolean-like class
-class BoolC b where
-  not  :: b -> b
-  (&&) :: b -> b -> b
-  (||) :: b -> b -> b
+-- A richer version is defined in SBV but seems to be internal.
+class Boolean b where
+  not      :: b -> b
+  (&&)     :: b -> b -> b
+  (||)     :: b -> b -> b
+  fromBool :: P.Bool -> b
 
 infixr 3 &&
 infixr 2 ||
 
-instance BoolC P.Bool where
-  not   = P.not
-  (&&) = (P.&&)
-  (||) = (P.||)
+instance Boolean P.Bool where
+  not      = P.not
+  (&&)     = (P.&&)
+  (||)     = (P.||)
+  fromBool = P.id
 
-instance BoolC SBool where
-  not   = sNot
-  (&&) = (.&&)
-  (||) = (.||)
+instance Boolean SBool where
+  not      = sNot
+  (&&)     = (.&&)
+  (||)     = (.||)
+  fromBool = Data.SBV.fromBool
 
 -- An integer-like class depending on a boolean-like class
-class (P.Num a, BoolC b) => IntC b a where
+class (P.Num a, Boolean b) => IntC b a where
   (==) :: a -> a -> b
   (/=) :: a -> a -> b
   (<)  :: a -> a -> b
@@ -53,7 +57,7 @@ instance IntC SBool SInt8 where
   (>)  = (.>)
   (>=) = (.>=)
 
--- A type that can be cast to from Int8
+-- A type that can be cast from Int8
 class FromInt8 a where
   fromInt8 :: Int8 -> a
 

@@ -11,16 +11,10 @@ import Class
 -- Unordered pitch interval
 -- Absolute distance in semitones between two pitches.
 type Upi  = Int8  -- should be non-negative
-type SUpi = SInt8 -- should be non-negative
 
 -- Ordered pitch interval
 -- Signed distance in semitones between two pitches.
 type Opi     = Int8
-type SOpi    = SInt8
-type OpiPair = (Opi, Opi)
-
-upi :: SPitchPair -> SUpi
-upi (p1 , p2) = ite (p1 .< p2) (p2 - p1) (p1 - p2)
 
 opi :: (Num a) => (a , a) -> a
 opi (p1 , p2) = p2 - p1
@@ -69,13 +63,10 @@ iv Per11 = 17
 iv Aug11 = 18
 iv Per12 = 19
 
-ivs :: Interval -> SInt8
-ivs = literal . iv
+--intervalWithinOctave :: SUpi -> SUpi
+--intervalWithinOctave i = i `sMod` 12
 
-intervalWithinOctave :: SUpi -> SUpi
-intervalWithinOctave i = i `sMod` 12
-
-isConsonant :: (IntC b a, FromInt8 a) => a -> b
+isConsonant :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isConsonant i =
   (i == f Per1)  ||
   (i == f Min3)  ||
@@ -89,10 +80,10 @@ isConsonant i =
   (i == f Per12)
   where f = fromInt8 . iv
 
-isDissonant :: (IntC b a, FromInt8 a) => a -> b
+isDissonant :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isDissonant = not . isConsonant
 
-isPerfect :: (IntC b a, FromInt8 a) => a -> b
+isPerfect :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isPerfect i =
   (i == f Per1)  ||
   (i == f Per4)  ||
@@ -101,20 +92,27 @@ isPerfect i =
   (i == f Per12)
   where f = fromInt8 . iv
 
-isUnison :: (IntC b a, FromInt8 a) => a -> b
+isUnison :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isUnison i = i == (f Per1)
   where f = fromInt8 . iv
 
+is158 :: (IntC bool interval, FromInt8 interval) => interval -> bool
+is158 i =
+  (i == f Per1)  ||
+  (i == f Per5)  ||
+  (i == f Per8)
+  where f = fromInt8 . iv
+
 -- Half or whole step.
-isStep :: (IntC b a, FromInt8 a) => a -> b
+isStep :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isStep i = (i == f Min2) || (i == f Maj2)
   where f = fromInt8 . iv
 
-isThird :: (IntC b a, FromInt8 a) => a -> b
+isThird :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isThird i = (i == f Min3) || (i == f Maj3)
   where f = fromInt8 . iv
 
-isLeap :: (IntC b a, FromInt8 a) => a -> b
+isLeap :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isLeap i = (i >= f Per4)
   where f = fromInt8 . iv
 
