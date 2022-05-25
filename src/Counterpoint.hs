@@ -1,11 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Counterpoint where
 
 import Data.List.Split (splitOn)
 import Data.Map (toList)
-import Data.SBV
-import Data.SBV.Internals (CV)
+import Data.SBV hiding (ite)
 import GHC.Exts (sortWith)
 import Prelude hiding ((==), (/=), (<=), (<), (>=), (>), not, (||), (&&))
 
@@ -79,9 +79,10 @@ makeCounterpoint1 music = sat $ do
 --  constrain $ (numLeaps cp) .== 1 -- 12
   solve $ firstSpecies pairs
 
--- Assumes input length is at least 3
--- Cantus firmus is first pair; counterpoint is always higher.
-firstSpecies :: (IntC bool pitch, FromInt8 pitch, SDivisible pitch) => [(pitch, pitch)] -> [bool]
+-- Two part first species counterpoint.
+-- Assumes input length is at least 3.
+-- Counterpoint can be in either part.
+firstSpecies :: forall bool pitch. (IntC bool pitch, FromInt8 pitch, SDivisible pitch) => [(pitch, pitch)] -> [bool]
 firstSpecies pps =
   let start  = head pps
       middle = tail (init pps)
@@ -94,9 +95,12 @@ firstSpecies pps =
       --startOk = checkStart start
       intervalsOk = map checkInterval4 middle
       motionOk = checkMotion pps
+      isleap = isLeap :: pitch -> bool
       --endOk = checkEnd end
-    in intervalsOk ++ scaleOk1 ++ scaleOk2 ++ motionOk
---  in startOk ++ intervalsOk ++ motionOk ++ scaleOk1 ++ scaleOk2 ++ endOk 
+      leapsOk = [numLeaps (isLeap :: pitch -> bool) (map fst pps) <= fromInt8 0]
+    in intervalsOk ++ scaleOk1 ++ scaleOk2 ++ motionOk ++ leapsOk
+--  in startOk ++ intervalsOk ++ motionOk ++ scaleOk1 ++ scaleOk2 ++ endOk
+
 
 makeCounterpoint2 :: [SPitch] -> IO SatResult
 makeCounterpoint2 cantusFirmus = sat $ do
@@ -106,8 +110,8 @@ makeCounterpoint2 cantusFirmus = sat $ do
   let cp  = zip cpStrong cpWeak :: [SPitchPair]
   let cpFlat = catPairs cp :: [SPitch]
   let second = zip cantusFirmus cp :: [(SPitch, SPitchPair)]
-  constrain $ sNot (repeatedNote cpFlat)
-  constrain $ numFalse (map (inScale majorScale) cpWeak) .<= 1
+--  constrain $ sNot (repeatedNote cpFlat)
+--  constrain $ numFalse (map (inScale majorScale) cpWeak) .<= 1
   constrain $ between cp
   solve $ secondSpecies strong
 
@@ -140,38 +144,9 @@ catPairs :: [(a,a)] -> [a]
 catPairs []            = []
 catPairs ((x,y) : xys) = x : y : catPairs xys
 
-{-
-cvsToInt8s :: [CV] -> [Int8]
-cvsToInt8s [] = []
-cvsToInt8s cvs = case parseCVs cvs of
-  Nothing         -> []
-  Just (w , cvs') -> w : cvsToInt8s cvs'
-
--- Expects variables to be of the form s0, s1, etc., so remove the "s" and sort via integer value.
-getPitches1 :: SatResult -> [Pitch]
-getPitches1 res = map fromIntegral (cvsToInt8s $ map snd (sortWith (r . tail . fst) (toList (getModelDictionary res))))
-  where r :: String -> Int
-        r = read
-
--- Expects variables to be of the form s0, s1, etc., so remove the "s" and sort via integer value.
--- Expects all strong beats first, followed by all weak beats. Last weak beat is superfluous so drop it.
-getPitches2 :: SatResult -> [Pitch]
-getPitches2 res = init1 $ interleave $ map fromIntegral (cvsToInt8s $ map snd (sortWith (r . tail . fst) (toList (getModelDictionary res))))
-  where r :: String -> Int
-        r = read
-        interleave :: [Pitch] -> [Pitch] -- interleave first and second halves of a list
-        interleave xs = foldr (\(a,b) cs -> a : b : cs) [] ((uncurry zip) (splitAt (length xs `div` 2) xs))
-        init1 :: [a] -> [a]
-        init1 [] = []
-        init1 xs = init xs
-
-getPitches :: Species -> SatResult -> [Pitch]
-getPitches First  = getPitches1
-getPitches Second = getPitches2
--}
-
 -------------------------------------------------------------------------------------
 
+{-
 numContrary :: [SPitchPair] -> SInteger
 numContrary []                = 0
 numContrary (_ : [])          = 0
@@ -181,17 +156,20 @@ repeatedNote :: [SPitch] -> SBool
 repeatedNote []             = sFalse
 repeatedNote (_ : [])       = sFalse
 repeatedNote (p1 : p2 : ps) = ite (p1 .== p2) sTrue (repeatedNote (p2 : ps))
+-}
 
-upi :: SPitchPair -> SInt8
-upi (p1 , p2) = ite (p1 .< p2) (p2 - p1) (p1 - p2)
+numLeaps :: (IntC bool int, FromInt8 int, Num int) => (int -> bool) -> [int] -> int
+numLeaps _ []             = fromInt8 0
+numLeaps _ (_ : [])       = fromInt8 0
+numLeaps f (p1 : p2 : ps) = (ite (f (opi (p1, p2))) 1 0) + (numLeaps f (p2 : ps))
 
-numLeaps :: [SPitch] -> SInteger
-numLeaps []             = 0
-numLeaps (_ : [])       = 0
-numLeaps (p1 : p2 : ps) = (ite (isLeap (upi (p1, p2))) 1 0) + (numLeaps (p2 : ps))
+numTrue :: (IntC bool int, FromInt8 int, Boolean bool) => (int -> bool) -> [int] -> int
+numTrue f xs = sum $ (map (\x -> ite (f x) (fromInt8 1) (fromInt8 0))) xs
 
+{-
 numTrue :: [SBool] -> SInteger
 numTrue xs = sum $ (map (\x -> ite x 1 0)) xs
 
 numFalse :: [SBool] -> SInteger
 numFalse xs = sum $ (map (\x -> ite x 0 1)) xs
+-}

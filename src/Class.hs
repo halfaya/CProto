@@ -38,6 +38,7 @@ class (P.Num a, Boolean b) => IntC b a where
   (<=) :: a -> a -> b
   (>)  :: a -> a -> b
   (>=) :: a -> a -> b
+  ite  :: b -> a -> a -> a
 
 infixr 4 ==, /=, <, <=, >, >=
 
@@ -48,6 +49,7 @@ instance IntC P.Bool Int8 where
   (<=) = (P.<=)
   (>)  = (P.>)
   (>=) = (P.>=)
+  ite  = \b a c -> if b then a else c
 
 instance IntC SBool SInt8 where
   (==) = (.==)
@@ -56,6 +58,7 @@ instance IntC SBool SInt8 where
   (<=) = (.<=)
   (>)  = (.>)
   (>=) = (.>=)
+  ite  = Data.SBV.ite
 
 -- A type that can be cast from Int8
 class FromInt8 a where

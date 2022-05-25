@@ -8,10 +8,6 @@ import Data.SBV
 import Pitch
 import Class
 
--- Unordered pitch interval
--- Absolute distance in semitones between two pitches.
-type Upi  = Int8  -- should be non-negative
-
 -- Ordered pitch interval
 -- Signed distance in semitones between two pitches.
 type Opi     = Int8
@@ -113,8 +109,8 @@ isThird i = (i == f Min3) || (i == f Maj3)
   where f = fromInt8 . iv
 
 isLeap :: (IntC bool interval, FromInt8 interval) => interval -> bool
-isLeap i = (i >= f Per4)
-  where f = fromInt8 . iv
+isLeap i = (i >= p4) || (i <= -p4)
+  where p4 = (fromInt8 . iv) Per4
 
 checkInterval :: (IntC b a, FromInt8 a) => (a, a) -> b
 checkInterval pp = let i = opi pp in isConsonant i && not (isUnison i)
