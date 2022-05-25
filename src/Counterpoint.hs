@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Counterpoint where
 
@@ -93,11 +94,11 @@ firstSpecies pps =
       scaleOk2 = map (inScale majorScale . snd) pps 
   
       --startOk = checkStart start
-      intervalsOk = map checkInterval4 middle
+      intervalsOk = map checkInterval middle
       motionOk = checkMotion pps
       isleap = isLeap :: pitch -> bool
       --endOk = checkEnd end
-      leapsOk = [numLeaps (isLeap :: pitch -> bool) (map fst pps) <= fromInt8 0]
+      leapsOk = [numLeaps @bool (map fst pps) <= fromInt8 0]
     in intervalsOk ++ scaleOk1 ++ scaleOk2 ++ motionOk ++ leapsOk
 --  in startOk ++ intervalsOk ++ motionOk ++ scaleOk1 ++ scaleOk2 ++ endOk
 
@@ -158,10 +159,15 @@ repeatedNote (_ : [])       = sFalse
 repeatedNote (p1 : p2 : ps) = ite (p1 .== p2) sTrue (repeatedNote (p2 : ps))
 -}
 
-numLeaps :: (IntC bool int, FromInt8 int, Num int) => (int -> bool) -> [int] -> int
-numLeaps _ []             = fromInt8 0
-numLeaps _ (_ : [])       = fromInt8 0
-numLeaps f (p1 : p2 : ps) = (ite (f (opi (p1, p2))) 1 0) + (numLeaps f (p2 : ps))
+numLeaps2 :: (IntC bool int, FromInt8 int, Num int) => (int -> bool) -> [int] -> int
+numLeaps2 _ []             = fromInt8 0
+numLeaps2 _ (_ : [])       = fromInt8 0
+numLeaps2 f (p1 : p2 : ps) = (ite (f (opi (p1, p2))) 1 0) + (numLeaps2 f (p2 : ps))
+
+numLeaps :: forall bool int. (IntC bool int, FromInt8 int, Num int) => [int] -> int
+numLeaps []             = fromInt8 0
+numLeaps (_ : [])       = fromInt8 0
+numLeaps (p1 : p2 : ps) = (ite ((isLeap @bool) (opi (p1, p2))) 1 0) + ((numLeaps @bool) (p2 : ps))
 
 numTrue :: (IntC bool int, FromInt8 int, Boolean bool) => (int -> bool) -> [int] -> int
 numTrue f xs = sum $ (map (\x -> ite (f x) (fromInt8 1) (fromInt8 0))) xs
