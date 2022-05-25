@@ -116,6 +116,13 @@ isLeap :: (IntC bool interval, FromInt8 interval) => interval -> bool
 isLeap i = (i >= f Per4)
   where f = fromInt8 . iv
 
+checkInterval :: (IntC b a, FromInt8 a) => (a, a) -> b
+checkInterval pp = let i = opi pp in isConsonant i && not (isUnison i)
+
+-- Perfect 4 is okay
+checkInterval4 :: (IntC b a, FromInt8 a) => (a, a) -> b
+checkInterval4 pp = let i = opi pp in (isConsonant i || i == (fromInt8 . iv) Per4) && not (isUnison i)
+
 {-
 isPassing :: SPitch -> SPitch -> SPitch -> SBool
 isPassing a b c =

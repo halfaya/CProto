@@ -5,12 +5,13 @@ module Main where
 import Data.SBV
 import System.Directory (getHomeDirectory)
 
+import Beethoven
 import Counterpoint
+import Frog
+import Interval
 import Midi
 import Pitch
-import Interval
 import Yamanote
-import Frog
 
 tempo :: Int
 tempo = 120
@@ -38,16 +39,22 @@ midiFilenameRelativePath = "/Music/MusicTools/test.mid"
 getMidiFilename :: IO String
 getMidiFilename = fmap (++ midiFilenameRelativePath) getHomeDirectory
 
-generateCounterpoint :: Species -> [Pitch] -> IO ()
-generateCounterpoint species cantusFirmus = do
+generateCounterpoint :: Species -> [[MPitch]] -> IO ()
+generateCounterpoint species music = do
+  res <- makeCounterpoint1 music
+  let ps = map toPair (getPitches res music) :: [PitchPair]
+  let cantusFirmus = map fst ps :: [Pitch]
+  let cpPitches = map snd ps
   let cfTrack = cantusFirmusTrack cantusFirmus
-  res <- makeCounterpoint species (map literal cantusFirmus)
-  let cpPitches = getPitches species res
   let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages (noteLength species) cpVelocity cpPitches)
   let fcpTracks = cpTrack : cfTrack : []
   midiFilename <- getMidiFilename
   exportTracks midiFilename ticksPerBeat fcpTracks
+  putStrLn $ show $ cantusFirmus
   putStrLn $ show $ cpPitches
 
+toFirstSpeciesInput :: [Pitch] -> [[MPitch]]
+toFirstSpeciesInput ps = toMPitches (map (\p -> [Just p, Nothing]) ps)
+
 main :: IO ()
-main = generateCounterpoint Second yamanote
+main = generateCounterpoint First (toMPitches beethoven146cf) --(toFirstSpeciesInput yamanote)

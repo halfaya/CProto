@@ -2,8 +2,6 @@
 
 module Yamanote where
 
-import Data.SBV
-
 import Pitch
 
 -- Yamanoto melody transposed down an octave and with an additional d6 before the end.

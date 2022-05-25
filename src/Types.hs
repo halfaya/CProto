@@ -2,10 +2,10 @@
 
 module Types where
 
-import Data.List.Split (splitOn)
 import Data.Maybe (catMaybes)
 import Data.SBV
 
+import Beethoven
 import Pitch
 import Interval
 import Motion
@@ -63,22 +63,10 @@ scarlatti =
    (e 4 , b 5) ,
    (a 4 , a 5) ]
 
-beethoven146 :: [PitchPair]
-beethoven146 =
-  [(g 5 , c 6) ,
-   (c 6 , e 6) ,
-   (b 5 , g 6) ,
-   (a 5 , f 6) ,
-   (g 5 , e 6) ,
-   (f 5 , c 6) ,
-   (a 5 , a 6) ,
-   (c 6 , f 6) ,
-   (b 5, g 6) ,
-   (g 5, e 6) ,
-   (g 5, d 6) ,
-   (g 5, c 6) ]
-
 test = catMaybes (map (checkInterval2 firstSpecies . pitchPairOpi) scarlatti)
+
+testi :: [Bool]
+testi = map checkInterval beethoven146
 
 testm :: [Bool]
 testm = checkMotion beethoven146
@@ -90,14 +78,6 @@ tests = sat $ do
   let cp = [literal (g 5), cp1]
   let music = zip cp cf
   solve $ checkMotion music
-
-toFreeName :: (Int, Int) -> String
-toFreeName (voice, position) = show voice ++ "_" ++ show position
-
-fromFreeName :: String -> (Int, Int)
-fromFreeName s = case splitOn "_" s of
-  [v , p] -> (read v , read p)
-  _       -> (-1, -1)
 
 t :: IO ()
 t = do

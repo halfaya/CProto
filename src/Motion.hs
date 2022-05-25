@@ -7,9 +7,6 @@ import Prelude hiding ((==), (/=), (<=), (<), (>=), (>), not, (||), (&&))
 import Class
 import Interval
 
-checkInterval :: (IntC b a, FromInt8 a) => (a, a) -> b
-checkInterval pp = let o = opi pp in isConsonant o && not (isUnison o)
-
 parallel :: (IntC b a) => ((a,a) , (a,a)) -> b
 parallel ((p1, q1), (p2, q2)) = opi (p1, p2) == opi (q1, q2) 
 
