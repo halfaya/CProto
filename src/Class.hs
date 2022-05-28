@@ -10,25 +10,31 @@ import Data.SBV
 -- A boolean-like class
 -- A richer version is defined in SBV but seems to be internal.
 class Boolean b where
+  true     :: b
+  false    :: b
   not      :: b -> b
   (&&)     :: b -> b -> b
   (||)     :: b -> b -> b
-  fromBool :: P.Bool -> b
+--  fromBool :: P.Bool -> b
 
 infixr 3 &&
 infixr 2 ||
 
 instance Boolean P.Bool where
+  true     = P.True
+  false    = P.False
   not      = P.not
   (&&)     = (P.&&)
   (||)     = (P.||)
-  fromBool = P.id
+--  fromBool = P.id
 
 instance Boolean SBool where
+  true     = sTrue
+  false    = sFalse
   not      = sNot
   (&&)     = (.&&)
   (||)     = (.||)
-  fromBool = Data.SBV.fromBool
+--  fromBool = Data.SBV.fromBool
 
 -- An integer-like class depending on a boolean-like class
 class (P.Num a, Boolean b) => IntC b a where

@@ -16,38 +16,27 @@ import Interval
 import Pitch
 import Interval
 import Motion
+import Music
 
-toVarName :: Int -> Int -> String
-toVarName voice position = show voice ++ "_" ++ show position
+toVarName :: (Int, Int, Int) -> String
+toVarName (voice, bar, beat) = show voice ++ "_" ++ show bar ++ "_" ++ show beat
 
-fromVarName :: String -> (Int, Int)
+fromVarName :: String -> (Int, Int, Int)
 fromVarName s = case splitOn "_" s of
-  [v , p] -> (read v , read p)
-  _       -> (-1, -1)
+  [voice , bar, beat] -> (read voice , read bar, read beat)
+  _       -> (-1, -1, -1)
 
 -- "Maybe Pitch": fixed pitch or named variable
 data MPitch = Fixed Pitch | Var String
   deriving Show
 
-toMPitch :: Int -> Int -> Maybe Pitch -> MPitch
-toMPitch position voice Nothing      = Var (toVarName position voice)
-toMPitch _        _     (Just pitch) = Fixed pitch
-
-toMPitches1 :: Int -> [Maybe Pitch] -> [MPitch]
-toMPitches1 position ps = map (uncurry (toMPitch position)) (zip [0..] ps)
-
-toMPitches :: [[Maybe Pitch]] -> [[MPitch]]
-toMPitches pss = map (uncurry toMPitches1) (zip [0..] pss)
+toMPitch :: (Int, Int, Int, Maybe Pitch) -> MPitch
+toMPitch (voice, bar, beat, Nothing)    = Var (toVarName (voice, bar, beat))
+toMPitch (_,     _,   _,    Just pitch) = Fixed pitch
 
 toSPitch :: MPitch -> Symbolic SPitch
 toSPitch (Fixed p) = return $ literal p
 toSPitch (Var   s) = free s
-
-toSPitches1 :: [MPitch] -> Symbolic [SPitch]
-toSPitches1 = mapM toSPitch
-
-toSPitches :: [[MPitch]] -> Symbolic [[SPitch]]
-toSPitches = mapM toSPitches1
 
 -- Get variable pitch from SAT result; returns -1 if error.
 getPitch :: SatResult -> MPitch -> Pitch
@@ -56,25 +45,41 @@ getPitch res (Var   s) = case getModelValue s res of
   Just p  -> p
   Nothing -> -1
 
-getPitches :: SatResult -> [[MPitch]] -> [[Pitch]]
-getPitches res = map (map (getPitch res))
+getPitches :: SatResult -> Music MPitch -> Music Pitch
+getPitches res = mapMusic (getPitch res)
+
+{-
+toMPitches1 :: Int -> [Maybe Pitch] -> [MPitch]
+toMPitches1 position ps = map (uncurry (toMPitch position)) (zip [0..] ps)
+
+toMPitches :: [[Maybe Pitch]] -> [[MPitch]]
+toMPitches pss = map (uncurry toMPitches1) (zip [0..] pss)
+
+toSPitches1 :: [MPitch] -> Symbolic [SPitch]
+toSPitches1 = mapM toSPitch
+
+toSPitches :: [[MPitch]] -> Symbolic [[SPitch]]
+toSPitches = mapM toSPitches1
 
 -- Assumes input list has two elements; otherwise runtime error.
 toPair :: [a] -> (a,a)
 toPair [x , y] = (x, y)
+-}
 
 data Species = First | Second
 
 {-
-makeCounterpoint :: Species -> [Pitch] -> IO SatResult
+makeCounterpoint :: Species -> [[MPitch]] -> IO SatResult
 makeCounterpoint First  = makeCounterpoint1
 makeCounterpoint Second = makeCounterpoint2
 -}
 
-makeCounterpoint1 :: [[MPitch]] -> IO SatResult
-makeCounterpoint1 music = sat $ do
-  m1 <- toSPitches music :: Symbolic [[SPitch]]
-  let pairs = map toPair m1 :: [SPitchPair]
+-- Assumes both voices have the same length.
+makeCounterpoint1 :: Music MPitch -> IO SatResult
+makeCounterpoint1 (Music [v1, v2]) = sat $ do
+  v1s <- (mapM toSPitch . flattenVoice) v1
+  v2s <- (mapM toSPitch . flattenVoice) v2
+  let pairs = zip v1s v2s :: [SPitchPair]
 --  constrain $ sNot (repeatedNote cp)
 --  constrain $ numContrary pairs .>= 4 -- 30
 --  constrain $ (numLeaps cp) .== 1 -- 12
@@ -102,8 +107,8 @@ firstSpecies pps =
     in intervalsOk ++ scaleOk1 ++ scaleOk2 ++ motionOk ++ leapsOk
 --  in startOk ++ intervalsOk ++ motionOk ++ scaleOk1 ++ scaleOk2 ++ endOk
 
-
-makeCounterpoint2 :: [SPitch] -> IO SatResult
+{-
+makeCounterpoint2 :: [[MPitch]] -> IO SatResult
 makeCounterpoint2 cantusFirmus = sat $ do
   cpStrong <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
   cpWeak <- mkExistVars (length cantusFirmus) :: Symbolic [SPitch]
@@ -115,13 +120,14 @@ makeCounterpoint2 cantusFirmus = sat $ do
 --  constrain $ numFalse (map (inScale majorScale) cpWeak) .<= 1
   constrain $ between cp
   solve $ secondSpecies strong
+-}
 
-between :: [SPitchPair] -> SBool
-between []                   = sTrue
-between (_     : [])         = sTrue
+between :: forall bool int. (IntC bool int, FromInt8 int, Num int) => [(int, int)] -> bool
+between []                   = true
+between (_     : [])         = true
 between ((a,b) : (c,d) : xs) =
-  ((a .< b .&& b .< c) .|| (a .> b .&& b .> c))
-  .&& between ((c,d) : xs)
+  ((a < b && b < c) || (a > b && b > c))
+  && between ((c,d) : xs)
 
 -- Assumes input length is at least 3
 -- Cantus firmus is first pair; counterpoint is always higher.
@@ -147,35 +153,23 @@ catPairs ((x,y) : xys) = x : y : catPairs xys
 
 -------------------------------------------------------------------------------------
 
-{-
-numContrary :: [SPitchPair] -> SInteger
+numContrary :: forall bool int. (IntC bool int, FromInt8 int, Num int) => [(int, int)] -> int
 numContrary []                = 0
 numContrary (_ : [])          = 0
-numContrary (pp1 : pp2 : pps) = (ite (contrary (pp1, pp2)) 1 0) + numContrary (pp2 : pps)
+numContrary (pp1 : pp2 : pps) = (ite ((contrary @bool) (pp1, pp2)) 1 0) + numContrary @bool (pp2 : pps)
 
-repeatedNote :: [SPitch] -> SBool
-repeatedNote []             = sFalse
-repeatedNote (_ : [])       = sFalse
-repeatedNote (p1 : p2 : ps) = ite (p1 .== p2) sTrue (repeatedNote (p2 : ps))
--}
-
-numLeaps2 :: (IntC bool int, FromInt8 int, Num int) => (int -> bool) -> [int] -> int
-numLeaps2 _ []             = fromInt8 0
-numLeaps2 _ (_ : [])       = fromInt8 0
-numLeaps2 f (p1 : p2 : ps) = (ite (f (opi (p1, p2))) 1 0) + (numLeaps2 f (p2 : ps))
+repeatedNote :: forall bool int. (IntC bool int) => [int] -> bool
+repeatedNote []             = false
+repeatedNote (_ : [])       = false
+repeatedNote (p1 : p2 : ps) = (p1 == p2) || (repeatedNote (p2 : ps))
 
 numLeaps :: forall bool int. (IntC bool int, FromInt8 int, Num int) => [int] -> int
 numLeaps []             = fromInt8 0
 numLeaps (_ : [])       = fromInt8 0
-numLeaps (p1 : p2 : ps) = (ite ((isLeap @bool) (opi (p1, p2))) 1 0) + ((numLeaps @bool) (p2 : ps))
+numLeaps (p1 : p2 : ps) = (ite (isLeap @bool (opi (p1, p2))) 1 0) + numLeaps @bool (p2 : ps)
 
-numTrue :: (IntC bool int, FromInt8 int, Boolean bool) => (int -> bool) -> [int] -> int
-numTrue f xs = sum $ (map (\x -> ite (f x) (fromInt8 1) (fromInt8 0))) xs
-
-{-
-numTrue :: [SBool] -> SInteger
+numTrue :: forall bool int. (IntC bool int) => [bool] -> int
 numTrue xs = sum $ (map (\x -> ite x 1 0)) xs
 
-numFalse :: [SBool] -> SInteger
+numFalse :: forall bool int. (IntC bool int) => [bool] -> int
 numFalse xs = sum $ (map (\x -> ite x 0 1)) xs
--}

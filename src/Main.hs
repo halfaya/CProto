@@ -10,6 +10,7 @@ import Counterpoint
 import Frog
 import Interval
 import Midi
+import Music
 import Pitch
 import Yamanote
 
@@ -39,22 +40,21 @@ midiFilenameRelativePath = "/Music/MusicTools/test.mid"
 getMidiFilename :: IO String
 getMidiFilename = fmap (++ midiFilenameRelativePath) getHomeDirectory
 
-generateCounterpoint :: Species -> [[MPitch]] -> IO ()
+generateCounterpoint :: Species -> Music MPitch -> IO ()
 generateCounterpoint species music = do
   res <- makeCounterpoint1 music
-  let ps = map toPair (getPitches res music) :: [PitchPair]
-  let cantusFirmus = map fst ps :: [Pitch]
-  let cpPitches = map snd ps
-  let cfTrack = cantusFirmusTrack cantusFirmus
-  let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages (noteLength species) cpVelocity cpPitches)
+  let m = flattenMusic (getPitches res music) :: [[Pitch]]
+  let (v0, v1) = (m !! 0, m !! 1) :: ([Pitch], [Pitch])
+  let cfTrack = cantusFirmusTrack v0 -- Assume v0 is cantus firmus for now
+  let cpTrack = MidiTrack "Counterpoint" marimba channel2 tempo (pitchesToMessages (noteLength species) cpVelocity v1)
   let fcpTracks = cpTrack : cfTrack : []
   midiFilename <- getMidiFilename
   exportTracks midiFilename ticksPerBeat fcpTracks
-  putStrLn $ show $ cantusFirmus
-  putStrLn $ show $ cpPitches
+  putStrLn $ show $ v0
+  putStrLn $ show $ v1
 
-toFirstSpeciesInput :: [Pitch] -> [[MPitch]]
-toFirstSpeciesInput ps = toMPitches (map (\p -> [Just p, Nothing]) ps)
+toFirstSpeciesInput :: FirstSpecies2 (Maybe Pitch) -> Music MPitch
+toFirstSpeciesInput = mapMusic toMPitch . indexMusic . firstSpecies2toMusic 
 
 main :: IO ()
-main = generateCounterpoint First (toMPitches beethoven146cf) --(toFirstSpeciesInput yamanote)
+main = generateCounterpoint First (toFirstSpeciesInput beethoven146cf)

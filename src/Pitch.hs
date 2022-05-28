@@ -36,7 +36,7 @@ b  = standardMidiPitch 11
 inScale :: (IntC bool pitch, FromInt8 pitch, SDivisible pitch) => Scale -> pitch -> bool
 inScale scale p =
   let p' = (p `sMod` 12)
-  in foldr (\q b -> (p' == q) || b) (fromBool False) (map fromInt8 scale)
+  in foldr (\q b -> (p' == q) || b) false (map fromInt8 scale)
 
 -- C major scale, but can transpose to give other scales
 majorScale :: Scale
