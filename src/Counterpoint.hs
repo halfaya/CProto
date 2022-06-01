@@ -30,9 +30,9 @@ fromVarName s = case splitOn "_" s of
 data MPitch = Fixed Pitch | Var String
   deriving Show
 
-toMPitch :: (Int, Int, Int, Maybe Pitch) -> MPitch
-toMPitch (voice, bar, beat, Nothing)    = Var (toVarName (voice, bar, beat))
-toMPitch (_,     _,   _,    Just pitch) = Fixed pitch
+toMPitch :: (Location, Maybe Pitch) -> MPitch
+toMPitch (Location voice bar beat, Nothing)    = Var (toVarName (voice, bar, beat))
+toMPitch (_,                       Just pitch) = Fixed pitch
 
 toSPitch :: MPitch -> Symbolic SPitch
 toSPitch (Fixed p) = return $ literal p
@@ -48,27 +48,13 @@ getPitch res (Var   s) = case getModelValue s res of
 getPitches :: SatResult -> Music MPitch -> Music Pitch
 getPitches res = mapMusic (getPitch res)
 
-{-
-toMPitches1 :: Int -> [Maybe Pitch] -> [MPitch]
-toMPitches1 position ps = map (uncurry (toMPitch position)) (zip [0..] ps)
-
-toMPitches :: [[Maybe Pitch]] -> [[MPitch]]
-toMPitches pss = map (uncurry toMPitches1) (zip [0..] pss)
-
-toSPitches1 :: [MPitch] -> Symbolic [SPitch]
-toSPitches1 = mapM toSPitch
-
-toSPitches :: [[MPitch]] -> Symbolic [[SPitch]]
-toSPitches = mapM toSPitches1
-
--- Assumes input list has two elements; otherwise runtime error.
-toPair :: [a] -> (a,a)
-toPair [x , y] = (x, y)
--}
-
 data Species = First | Second
 
 {-
+-- Assumes input list has two elements; otherwise runtime error.
+toPair :: [a] -> (a,a)
+toPair [x , y] = (x, y)
+
 makeCounterpoint :: Species -> [[MPitch]] -> IO SatResult
 makeCounterpoint First  = makeCounterpoint1
 makeCounterpoint Second = makeCounterpoint2

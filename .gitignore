@@ -3,6 +3,7 @@ dist-*
 newdist
 newdist-*
 cabal-dev
+.DS_Store
 *.o
 *.hi
 *.hie

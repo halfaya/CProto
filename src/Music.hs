@@ -21,6 +21,14 @@ instance (Show a) => Show (Voice a) where
 instance (Show a) => Show (Music a) where
   show (Music xs) = intercalate " ||\n" (map show xs)
 
+-- voice, bar, beat
+data Location = Location Int Int Int
+
+instance Show Location where
+  show (Location voice bar beat) = "Voice " ++ show voice ++ " bar " ++ show bar ++ " beat " ++ show beat
+
+--instance Range1 
+
 mapBeat :: (a -> b) -> Beat a -> Beat b
 mapBeat f (Beat x) = Beat (f x)
 
@@ -34,15 +42,15 @@ mapMusic :: (a -> b) -> Music a -> Music b
 mapMusic f (Music xs) = Music (map (mapVoice f) xs)
 
 -- count beats per bar
-indexBar :: Int -> Int -> Bar a -> Bar (Int, Int, Int, a)
-indexBar voice bar (Bar xs) = Bar (map (\(beat, Beat x) -> Beat (voice, bar, beat, x)) (zip [0..] xs))
+indexBar :: Int -> Int -> Bar a -> Bar (Location, a)
+indexBar voice bar (Bar xs) = Bar (map (\(beat, Beat x) -> Beat (Location voice bar beat, x)) (zip [0..] xs))
 
 -- count bars per voice and beats per bar
-indexVoice :: Int -> Voice a -> Voice (Int, Int, Int, a)
+indexVoice :: Int -> Voice a -> Voice (Location, a)
 indexVoice voice (Voice xs) = Voice (map (\(bar, x) -> indexBar voice bar x) (zip [0..] xs))
 
 -- count voices, bars per voice and beats per bar
-indexMusic :: Music a -> Music (Int, Int, Int, a)
+indexMusic :: Music a -> Music (Location, a)
 indexMusic (Music xs) = Music (map (\(voice, x) -> indexVoice voice x) (zip [0..] xs))
 
 flattenBar :: Bar a -> [a]

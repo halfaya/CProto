@@ -41,3 +41,21 @@ inScale scale p =
 -- C major scale, but can transpose to give other scales
 majorScale :: Scale
 majorScale = [0, 2, 4, 5, 7, 9, 11]
+
+-- Pitch name
+data PName = C | D | E | F | G | A | B
+  deriving Show
+
+-- Accidental
+data PAcc = Fl | Nat | Sh
+
+instance Show PAcc where
+  show Fl  = "♭"
+  show Nat = "♮"
+  show Sh  = "♯"
+
+-- Symbolic pitch
+data PSym = PSym PName PAcc
+
+instance Show PSym where
+  show (PSym n a) = show n ++ show a

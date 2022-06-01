@@ -1,0 +1,284 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{19}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Aldwell and Cadwallader(2018)]%
+        {Aldwell2018}
+\bibfield{author}{\bibinfo{person}{E. Aldwell} {and} \bibinfo{person}{A.
+  Cadwallader}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Harmony and Voice Leading}}.
+\newblock \bibinfo{publisher}{Cengage Learning}.
+\newblock
+\showISBNx{9781337560573}
+\showLCCN{2017942686}
+
+
+\bibitem[Cheney and Hinze(2002)]%
+        {cheney2002lightweight}
+\bibfield{author}{\bibinfo{person}{James Cheney} {and} \bibinfo{person}{Ralf
+  Hinze}.} \bibinfo{year}{2002}\natexlab{}.
+\newblock \showarticletitle{A lightweight implementation of generics and
+  dynamics}. In \bibinfo{booktitle}{\emph{Proceedings of the 2002 ACM SIGPLAN
+  workshop on Haskell}}. ACM, \bibinfo{pages}{90--104}.
+\newblock
+
+
+\bibitem[Cong(2022)]%
+        {Cong2022a}
+\bibfield{author}{\bibinfo{person}{Youyou Cong}.}
+  \bibinfo{year}{2022}\natexlab{}.
+\newblock \bibinfo{title}{Towards Type-Based Music Composition}.
+\newblock
+  \bibinfo{howpublished}{\url{https://drive.google.com/file/d/1GZalMD3T5YFVfIO4xeUL4G35Y4pURFDE/view}}.
+\newblock
+\newblock
+\shownote{Presented at TFPIE 2022}.
+
+
+\bibitem[Cong and Leo(2019)]%
+        {CongLeo2019}
+\bibfield{author}{\bibinfo{person}{Youyou Cong} {and} \bibinfo{person}{John
+  Leo}.} \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Demo: Counterpoint by Construction}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 7th ACM SIGPLAN International
+  Workshop on Functional Art, Music, Modeling, and Design}} (Berlin, Germany)
+  \emph{(\bibinfo{series}{FARM 2019})}. \bibinfo{publisher}{Association for
+  Computing Machinery}, \bibinfo{address}{New York, NY, USA},
+  \bibinfo{pages}{22–24}.
+\newblock
+\showISBNx{9781450368117}
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3331543.3342578}
+\showDOI{\tempurl}
+
+
+\bibitem[Dagand(2017)]%
+        {dagand2017essence}
+\bibfield{author}{\bibinfo{person}{Pierre-Evariste Dagand}.}
+  \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{The essence of ornaments}.
+\newblock \bibinfo{journal}{\emph{Journal of Functional Programming}}
+  \bibinfo{volume}{27} (\bibinfo{year}{2017}), \bibinfo{pages}{e9}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1017/S0956796816000356}
+\showDOI{\tempurl}
+
+
+\bibitem[De~Haas et~al\mbox{.}(2011)]%
+        {hihseufha}
+\bibfield{author}{\bibinfo{person}{W.~Bas De~Haas},
+  \bibinfo{person}{Jos\'e~Pedro Magalh\~aes}, \bibinfo{person}{Remco~C.
+  Veltkamp}, {and} \bibinfo{person}{Frans Wiering}.}
+  \bibinfo{year}{2011}\natexlab{}.
+\newblock \showarticletitle{{HarmTrace}: Improving Harmonic Similarity
+  Estimation Using Functional Harmony Analysis}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 12th International Society for
+  Music Information Retrieval Conference}} \emph{(\bibinfo{series}{ISMIR
+  '11})}. \bibinfo{pages}{67--72}.
+\newblock
+
+
+\bibitem[De~Haas et~al\mbox{.}(2013)]%
+        {hafha}
+\bibfield{author}{\bibinfo{person}{W.~Bas De~Haas},
+  \bibinfo{person}{Jos\'e~Pedro Magalh\~aes}, \bibinfo{person}{Frans Wiering},
+  {and} \bibinfo{person}{Remco~C. Veltkamp}.} \bibinfo{year}{2013}\natexlab{}.
+\newblock \showarticletitle{{HarmTrace}: Automatic Functional Harmonic
+  Analysis}.
+\newblock \bibinfo{journal}{\emph{Computer Music Journal}}
+  \bibinfo{volume}{37:4} (\bibinfo{year}{2013}), \bibinfo{pages}{37--53}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1162/COMJ_a_00209}
+\showDOI{\tempurl}
+
+
+\bibitem[Eisenberg and Weirich(2013)]%
+        {eisenberg2013dependently}
+\bibfield{author}{\bibinfo{person}{Richard~A Eisenberg} {and}
+  \bibinfo{person}{Stephanie Weirich}.} \bibinfo{year}{2013}\natexlab{}.
+\newblock \showarticletitle{Dependently typed programming with singletons}.
+\newblock \bibinfo{journal}{\emph{ACM SIGPLAN Notices}} \bibinfo{volume}{47},
+  \bibinfo{number}{12} (\bibinfo{year}{2013}), \bibinfo{pages}{117--130}.
+\newblock
+
+
+\bibitem[Fux(1965)]%
+        {Fux1965}
+\bibfield{author}{\bibinfo{person}{Johann~Joseph Fux}.}
+  \bibinfo{year}{1965}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{The Study of Counterpoint}}.
+\newblock \bibinfo{publisher}{W.~W.~Norton \& Company}.
+\newblock
+\showISBNx{9780393002775}
+
+
+\bibitem[Huang et~al\mbox{.}(2017)]%
+        {CounterpointByConvolution}
+\bibfield{author}{\bibinfo{person}{Cheng-Zhi~Anna Huang}, \bibinfo{person}{Tim
+  Cooijmans}, \bibinfo{person}{Adam Roberts}, \bibinfo{person}{Aaron
+  Courville}, {and} \bibinfo{person}{Douglas Eck}.}
+  \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{Counterpoint by Convolution}. In
+  \bibinfo{booktitle}{\emph{Proceedings of ISMIR 2017}}.
+\newblock
+\urldef\tempurl%
+\url{https://ismir2017.smcnus.org/wp-content/uploads/2017/10/187_Paper.pdf}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Hudak and Quick(2018)]%
+        {hudak2018haskell}
+\bibfield{author}{\bibinfo{person}{Paul Hudak} {and} \bibinfo{person}{Donya
+  Quick}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{The Haskell School of Music: From Signals
+  to Symphonies}}.
+\newblock \bibinfo{publisher}{Cambridge University Press}.
+\newblock
+\showISBNx{9781108416757}
+\showLCCN{2018016879}
+
+
+\bibitem[Kennan(1999)]%
+        {Kennan1999}
+\bibfield{author}{\bibinfo{person}{Kent Kennan}.}
+  \bibinfo{year}{1999}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Counterpoint : based on eighteenth-century
+  practice} (\bibinfo{edition}{4th ed.} ed.)}.
+\newblock \bibinfo{publisher}{Prentice Hall}, \bibinfo{address}{Upper Saddle
+  River, NJ}.
+\newblock
+\showISBNx{013080746X}
+\showLCCN{98022174}
+
+
+\bibitem[Koops et~al\mbox{.}(2013)]%
+        {faamh}
+\bibfield{author}{\bibinfo{person}{Hendrik~Vincent Koops},
+  \bibinfo{person}{Jos{\'e}~Pedro Magalh\~{a}es}, {and} \bibinfo{person}{W.~Bas
+  De~Haas}.} \bibinfo{year}{2013}\natexlab{}.
+\newblock \showarticletitle{A Functional Approach to Automatic Melody
+  Harmonisation}. In \bibinfo{booktitle}{\emph{Proceedings of the First ACM
+  SIGPLAN Workshop on Functional Art, Music, Modeling \& Design}} (Boston,
+  Massachusetts, USA) \emph{(\bibinfo{series}{FARM '13})}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{47--58}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/2505341.2505343}
+\showDOI{\tempurl}
+
+
+\bibitem[Magalh\~{a}es and de~Haas(2011)]%
+        {fmmh}
+\bibfield{author}{\bibinfo{person}{Jos{\'e}~Pedro Magalh\~{a}es} {and}
+  \bibinfo{person}{W.~Bas de Haas}.} \bibinfo{year}{2011}\natexlab{}.
+\newblock \showarticletitle{Functional modelling of musical harmony: an
+  experience report}. In \bibinfo{booktitle}{\emph{Proceedings of the 16th ACM
+  SIGPLAN International Conference on Functional Programming}} (Tokyo, Japan)
+  \emph{(\bibinfo{series}{ICFP '11})}. \bibinfo{publisher}{ACM},
+  \bibinfo{address}{New York, NY, USA}, \bibinfo{pages}{156--162}.
+\newblock
+\showISBNx{978-1-4503-0865-6}
+
+
+\bibitem[Magalh\~aes and Koops(2014)]%
+        {fghm}
+\bibfield{author}{\bibinfo{person}{Jos\'e~Pedro Magalh\~aes} {and}
+  \bibinfo{person}{Hendrik~Vincent Koops}.} \bibinfo{year}{2014}\natexlab{}.
+\newblock \showarticletitle{Functional Generation of Harmony and Melody}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the Second ACM SIGPLAN Workshop on
+  Functional Art, Music, Modeling \& Design}}
+  \emph{(\bibinfo{series}{FARM~'14})}. \bibinfo{publisher}{ACM}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/2633638.2633645}
+\showDOI{\tempurl}
+
+
+\bibitem[Monnier and Haguenauer(2010)]%
+        {monnier2010singleton}
+\bibfield{author}{\bibinfo{person}{Stefan Monnier} {and} \bibinfo{person}{David
+  Haguenauer}.} \bibinfo{year}{2010}\natexlab{}.
+\newblock \showarticletitle{Singleton types here, singleton types there,
+  singleton types everywhere}. In \bibinfo{booktitle}{\emph{Proceedings of the
+  4th ACM SIGPLAN workshop on Programming languages meets program
+  verification}}. ACM, \bibinfo{pages}{1--8}.
+\newblock
+
+
+\bibitem[Norell(2007)]%
+        {norellphd}
+\bibfield{author}{\bibinfo{person}{Ulf Norell}.}
+  \bibinfo{year}{2007}\natexlab{}.
+\newblock \emph{\bibinfo{title}{Towards a practical programming language based
+  on dependent type theory}}.
+\newblock \bibinfo{thesistype}{Ph.\,D. Dissertation}. \bibinfo{school}{Chalmers
+  University of Technology}.
+\newblock
+
+
+\bibitem[Szamozvancev and Gale(2017)]%
+        {szamozvancev2017well}
+\bibfield{author}{\bibinfo{person}{Dmitrij Szamozvancev} {and}
+  \bibinfo{person}{Michael~B Gale}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{Well-typed music does not sound wrong (experience
+  report)}. In \bibinfo{booktitle}{\emph{ACM SIGPLAN Notices}},
+  Vol.~\bibinfo{volume}{52}. ACM, \bibinfo{pages}{99--104}.
+\newblock
+
+
+\bibitem[Tabareau et~al\mbox{.}(2018)]%
+        {tabareau2017equivalences}
+\bibfield{author}{\bibinfo{person}{Nicolas Tabareau}, \bibinfo{person}{\'{E}ric
+  Tanter}, {and} \bibinfo{person}{Matthieu Sozeau}.}
+  \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{Equivalences for Free: Univalent Parametricity for
+  Effective Transport}.
+\newblock \bibinfo{journal}{\emph{Proc. ACM Program. Lang.}}
+  \bibinfo{volume}{2}, \bibinfo{number}{ICFP}, Article \bibinfo{articleno}{92}
+  (\bibinfo{date}{July} \bibinfo{year}{2018}), \bibinfo{numpages}{29}~pages.
+\newblock
+\showISSN{2475-1421}
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3236787}
+\showDOI{\tempurl}
+
+
+\end{thebibliography}

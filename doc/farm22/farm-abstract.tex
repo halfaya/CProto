@@ -1,0 +1,331 @@
+\documentclass[sigplan,screen]{acmart}
+\settopmatter{printccs=false}
+
+\setcopyright{none}
+\acmPrice{}
+\acmDOI{}
+\acmYear{}
+\copyrightyear{}
+\acmISBN{}
+\acmConference[FARM '22]{}
+\acmBooktitle{}
+
+%% Bibliography style
+\bibliographystyle{ACM-Reference-Format}
+%% Citation style
+%% Note: author/year citations are required for papers published as an
+%% issue of PACMPL.
+\citestyle{acmauthoryear}   %% For author/year citations
+
+%% Some recommended packages.
+\usepackage{booktabs}   %% For formal tables:
+                        %% http://ctan.org/pkg/booktabs
+\usepackage{subcaption} %% For complex figures with subfigures/subcaptions
+                        %% http://ctan.org/pkg/subcaption
+\usepackage{alltt}
+
+\begin{document}
+
+%% Title information
+\title{Demo: Counterpoint Analysis and Synthesis}
+%\subtitle{Functional Pearl}
+
+%% Author information
+%% Contents and number of authors suppressed with 'anonymous'.
+
+\author{John Leo}
+\affiliation{
+  \institution{Halfaya Research}
+  \city{Bellevue}
+  \state{WA}
+  \country{USA}
+}
+\email{leo@halfaya.org}
+
+
+%% Abstract
+%% Note: \begin{abstract}...\end{abstract} environment must come
+%% before \maketitle command
+\begin{abstract}
+We present \emph{Music Tools}, an Agda library for analyzing 
+and synthesizing music.  
+The library uses dependent types to simplify encoding of 
+music rules, thus improving existing approaches based on 
+simply typed languages.  
+As an application of the library, we demonstrate an 
+implementation of first-species counterpoint, where we use
+dependent types to constrain the motion of two parallel
+voices.
+\end{abstract}
+
+
+%% 2012 ACM Computing Classification System (CSS) concepts
+%% Generate at 'http://dl.acm.org/ccs/ccs.cfm'.
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10010405.10010469.10010475</concept_id>
+<concept_desc>Applied computing~Sound and music computing</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10011006.10011008.10011009.10011012</concept_id>
+<concept_desc>Software and its engineering~Functional languages</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Applied computing~Sound and music computing}
+\ccsdesc[500]{Software and its engineering~Functional languages}
+%% End of generated code
+
+%% Keywords
+%% comma separated list
+\keywords{counterpoint, Haskell, SMT}  %% \keywords are mandatory in final camera-ready submission
+
+
+%% \maketitle
+%% Note: \maketitle command must come after title commands, author
+%% commands, abstract environment, Computing Classification System
+%% environment and commands, and keywords command.
+\maketitle
+
+\section{Introduction}
+
+We demonstrate work in progress on a tool to assist in the analysis of
+synthesis of musical counterpoint. Since the mid-18th century, the
+composition of counterpoint has been guided by principles enunciated
+in Fux's \textit{Gradus ad Parnassum} \citep{Fux1965}, first published
+in 1725. Fux presents an increasingly sophisticated series of
+``species'' (one note against one note, two notes against one note,
+etc.) along with rules governing intervals between notes and motion
+between intervals designed to ensure consonance and independence of
+voices. It is well documented that composers including Haydn,
+Mozart and Beethoven both studied and taught from this text, and its
+fundamentals continue to taught to music students today (for example
+\cite{Kennan1999, Aldwell2018}).
+
+In previous work, Cong and Leo \citep{CongLeo2019} encode the rules of
+first-species (note against note) counterpoint as type constructors in
+the dependenty-typed language Agda. This enforces
+correct-by-construction counterpoint and allows use of the Agda
+typechecker to return errors with no additional effort required. On
+the down side, these errors can be difficult to interpret for those
+less familiar with type errors. Furthermore, encoding rules into
+constructors proved awkward for handling more complex species and
+more global constraints. One could separate the construction of the
+pure music from the constraints which can be added as a local or
+global predicate, but one may also wish to deliberately violate some
+of the rules of strict counterpoint, as composers often do in
+practice, and simply be informed of where the violations occur without
+being prohibited from incorporating them.
+
+Another approach then is to write a special-purpose ``type checker''
+which can be run on previously-created music and which can generate
+clear and precise error messages which are musically meaningful. The
+checker is ideally easily customizable in terms of what constraints
+one would like to impose. It turns out these constraints can be
+expressed in the quantifier-free logic of linear arithmetic and
+uninterpreted functions (QF-UFLIA \cite{Barrett2010}), which allows
+one to not only analyze existing counterpoint, but also synthesize
+counterpoint satisfying the constraints using an SMT solver.
+
+This tool has been implemented in Haskell and is available at
+\cite{HaskellCounterpoint}. Haskell was chosen as a high-quality and
+feature-rich SMT library called SBV \citep{SBV} is available.
+
+
+Cong \citep{Cong2022a}.
+
+To analyze and synthesize tonal music, researchers have
+attempted to encode these rules into programming languages.
+Functional programming languages seem
+ideally suited for this task, and in particular, those with a static
+type system can further guarantee that \emph{well-typed music 
+does not sound wrong}.
+In the past decade, Haskell has been a popular choice for encoding
+the rules of harmony \citep{fmmh, hihseufha, faamh, hafha, fghm}
+as well as counterpoint \citep{szamozvancev2017well}.
+An interesting observation is that, many of the existing encodings
+rely on some form of \emph{dependent types}, i.e.,  
+types that depend on terms. 
+While Haskell is not a dependently typed language, it has various 
+language extensions (such as GADTs \citep{cheney2002lightweight} 
+and singleton types \citep{eisenberg2013dependently}) for 
+simulating dependent types, and as shown by previous studies,
+the extended type system is expressive enough for 
+a wide class of music applications.
+On the other hand, the need for simulating dependent types 
+can also result in code duplication, making the implementation 
+less elegant \citep{monnier2010singleton}.
+This motivates us to explore music programming in a language
+with intrinsic support for dependent types.
+
+We present Music Tools\footnote{\url{https://github.com/halfaya/MusicTools}},
+a library of small tools that can be combined functionally to 
+help analyze and synthesize music.
+To allow simple and natural encoding of rules, we build our 
+library in Agda \citep{norellphd}, a functional language with full dependent types.
+As an application of the library, we demonstrate an
+implementation of species counterpoint, based on the rules 
+given by \citet{Fux1965}.
+Thanks to Agda's rich type system, we can express 
+the rules in a straightforward manner, and thus ensure by 
+construction that well-typed counterpoint satisfies all the 
+required rules.
+
+
+\section{The Music Tools Library}
+
+The goal of Music Tools is to provide a core collection of types and functions
+that can be used to easily build applications to analyze and synthesize music.
+It is intended to evolve into a dependently-typed replacement for Euterpea
+\citep{hudak2018haskell}, and borrows many ideas from that library.
+Currently, Music Tools is restricted to the chromatic scale for simplicity, 
+and like Euterpea is designed to work well with MIDI.
+
+The fundamental type for melody is \texttt{Pitch}, which is just a natural number with $0$
+representing the lowest expressible pitch (it is intended to correspond to MIDI note 0, but
+the interpretation can change depending upon the application). One can also
+express pitch as a pair of an octave and relative pitch within the octave, which is
+more convenient for some applications, and convert between this representation and
+absolute pitch. One can then prove that converting back and forth is the identity function.
+
+For rhythm the fundamental type is \texttt{Duration}, also a natural number, which represents
+some unspecified unit of time (when the music is played the unit is then specified).
+A combination of a pitch and a duration gives a \texttt{Note}, and notes in turn are
+made into \texttt{Music} via sequential and parallel composition, as in Euterpea.
+
+To play music on synthesizers, one can convert it to MIDI by calling 
+Haskell MIDI libraries via Agda's Haskell FFI. 
+Details can be found in the GitHub repository.
+
+\section{Application: First-Species Counterpoint}
+
+We now explain how to implement the rule system of 
+first-species counterpoint\footnote{The code is available at \\
+\url{https://github.com/halfaya/MusicTools/blob/master/agda/Counterpoint.agda}.}.
+In first-species counterpoint, one starts with a base melody 
+(the \emph{cantus firmus}), and constructs a counterpoint 
+melody note-by-note in the same rhythm.
+The two voices are represented as a list of pitch-interval pairs,
+where intervals must not be dissonant (2nds, 7ths, or 4ths).
+
+\begin{alltt}
+data IntervalQuality : Set where
+  min3  : IntervalQuality
+  maj3  : IntervalQuality
+  per5  : IntervalQuality
+  min6  : IntervalQuality
+  maj6  : IntervalQuality
+  per8  : IntervalQuality
+  min10 : IntervalQuality
+  maj10 : IntervalQuality
+
+PitchInterval : Set
+PitchInterval = Pitch \(\times\) IntervalQuality
+\end{alltt}
+
+In addition, it is prohibited to move from any interval to
+a perfect interval (5th or octave) via parallel or similar motion.
+Therefore, we define a predicate that checks whether a motion 
+is allowed or not.
+
+\begin{alltt}
+motionOk : (i1 : Interval)
+           (i2 : Interval) \(\rightarrow\) Set
+motionOk i1 i2 with motion i1 i2
+         | isPerfectInterval i2
+motionOk i1 i2 | contrary | \_     = \(\top\)
+motionOk i1 i2 | oblique  | \_     = \(\top\)
+motionOk i1 i2 | parallel | false = \(\top\)
+motionOk i1 i2 | parallel | true  = \(\bot\)
+motionOk i1 i2 | similar  | false = \(\top\)
+motionOk i1 i2 | similar  | true  = \(\bot\)
+\end{alltt}
+
+The last requirement is that the music must end with a cadence,
+which is a final motion from the 2nd or 7th degree to the tonic 
+(1st degree). 
+We impose this requirement by declaring two cadence constructors 
+as the base cases of counterpoint (note that the final interval of
+the cadence is always \texttt{(p\ ,\ per8)} and hence is not explicitly
+specified).
+Thus, we arrive at the following datatype for well-typed counterpoint\footnote{
+For readability, we have omitted explicit conversions 
+from \texttt{PitchInterval} (which ensures the interval is not dissonant) 
+to the general \texttt{Interval}.}.
+
+\begin{alltt}
+data FirstSpecies : PitchInterval \(\rightarrow\)
+                    Set where
+  cadence2 : (p : Pitch) \(\rightarrow\)
+    FirstSpecies (transpose (+ 2) p , maj6)
+  cadence7 : (p : Pitch) \(\rightarrow\)
+    FirstSpecies (transpose -[1+ 0 ] p , min10)
+  \_::\_ : (pi : PitchInterval) \(\rightarrow\)
+         \{pj : PitchInterval\} \(\rightarrow\)
+         \{\_ : motionOk pi pj\} \(\rightarrow\)
+         FirstSpecies pj \(\rightarrow\)
+         FirstSpecies pi
+\end{alltt}
+
+\noindent Observe that \texttt{motionOk} is an implicit argument of 
+the \texttt{\_::\_} constructor, here denoted by the curly braces. 
+The argument can be resolved automatically by the type checker,
+hence there is no need to manually supply this proof. 
+
+Now we can write valid first-species counterpoint as in the 
+example below.
+
+\begin{alltt}
+example : FirstSpecies (g 4 , per8)
+example = 
+  (g 4 , per8) :: (c 5 , maj10) ::
+  (c 5 , per8) :: (c 5 , maj10) ::
+  (e 5 , min10) :: (g 5 , per8) ::
+  (cadence2 (c 6))
+\end{alltt}
+
+
+\section{Future Work}
+
+We intend to expand the Music Tools library to include
+richer functionality for analysis and synthesis. We are
+particularly interested in expressing the work done in Haskell
+on functional harmony in the library, to see how much
+dependent types can simplify the representation.
+
+Music is a rich yet circumscribed domain in which
+issues of equivalence \citep{tabareau2017equivalences}
+and ornamentation \citep{dagand2017essence} naturally arise.
+For example, a
+musical score can be interpreted either horizontally (counterpoint) or
+vertically (harmony), and it is important to be able to seamlessly
+convert between these representations. Similarly, one may wish to treat
+pitch or rhythm separately as well as combine them, which is a natural
+application of ornamentation. We plan to examine the extent to which this
+research can be put to use in a practical domain.
+
+For counterpoint specifically, we intend to represent higher species 
+counterpoint by extending the rules, 
+and to explore automatic generation of species counterpoint.
+It would be interesting to compare our correct-by-construction counterpoint
+with that created by machine learning \citep{CounterpointByConvolution}, 
+which does not have correctness guarantees.
+
+%% Acknowledgments
+\begin{acks}                            %% contents suppressed with 'anonymous'
+ The authors would like to thank the participants of the Tokyo Agda 
+ Implementors' Meeting, especially Ulf Norell and Jesper Cockx,
+ for many helpful suggestions that improved our Agda code.
+ We also thank the anonymous reviewers for their thoughtful feedback,
+ which improved our presentation.
+\end{acks}
+
+
+%% Bibliography
+\bibliography{farm-abstract.bib}
+
+\end{document}
