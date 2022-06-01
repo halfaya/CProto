@@ -4,6 +4,10 @@ newdist
 newdist-*
 cabal-dev
 .DS_Store
+*.out
+*.log
+*.bbl
+*.blg
 *.o
 *.hi
 *.hie
