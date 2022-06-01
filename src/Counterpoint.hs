@@ -85,12 +85,14 @@ firstSpecies pps =
       scaleOk2 = map (inScale majorScale . snd) pps 
   
       --startOk = checkStart start
-      intervalsOk = map checkInterval middle
+      intervalsOk = map checkInterval4 middle
       motionOk = checkMotion pps
       isleap = isLeap :: pitch -> bool
       --endOk = checkEnd end
-      leapsOk = [numLeaps @bool (map fst pps) <= fromInt8 0]
-    in intervalsOk ++ scaleOk1 ++ scaleOk2 ++ motionOk ++ leapsOk
+      leapsOk = [numLeaps @bool (map fst pps) <= fromInt8 1]
+      contraryOk = [numContrary @bool pps >= fromInt8 6]
+      repeatedOk = [not (repeated3Note (map opi pps))]
+    in intervalsOk ++ scaleOk1 ++ scaleOk2 ++ motionOk ++ repeatedOk ++ contraryOk ++ leapsOk
 --  in startOk ++ intervalsOk ++ motionOk ++ scaleOk1 ++ scaleOk2 ++ endOk
 
 {-
@@ -148,6 +150,12 @@ repeatedNote :: forall bool int. (IntC bool int) => [int] -> bool
 repeatedNote []             = false
 repeatedNote (_ : [])       = false
 repeatedNote (p1 : p2 : ps) = (p1 == p2) || (repeatedNote (p2 : ps))
+
+repeated3Note :: forall bool int. (IntC bool int) => [int] -> bool
+repeated3Note []                  = false
+repeated3Note (_ : [])            = false
+repeated3Note (_ : _ : [])        = false
+repeated3Note (p1 : p2 : p3 : ps) = ((p1 == p2) && (p1 == p3)) || (repeated3Note (p2 : p3 : ps))
 
 numLeaps :: forall bool int. (IntC bool int, FromInt8 int, Num int) => [int] -> int
 numLeaps []             = fromInt8 0

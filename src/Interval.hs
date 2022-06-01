@@ -70,10 +70,10 @@ isConsonant i =
   (i == f Per5)  ||
   (i == f Min6)  ||
   (i == f Maj6)  ||
-  (i == f Per8)  ||
-  (i == f Min10) ||
-  (i == f Maj10) ||
-  (i == f Per12)
+  (i == f Per8)--  ||
+--  (i == f Min10) ||
+--  (i == f Maj10) ||
+--  (i == f Per12)
   where f = fromInt8 . iv
 
 isDissonant :: (IntC bool interval, FromInt8 interval) => interval -> bool
