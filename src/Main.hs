@@ -6,6 +6,7 @@ import Data.SBV
 import System.Directory (getHomeDirectory)
 
 import Beethoven
+import Constraint
 import Counterpoint
 import Frog
 import Interval
@@ -58,3 +59,8 @@ toFirstSpeciesInput = mapMusic toMPitch . indexMusic . firstSpecies2toMusic
 
 main :: IO ()
 main = generateCounterpoint First (toFirstSpeciesInput beethoven146cf)
+
+-- temporary tests
+test1 =
+  (checkIntervals2 . indexMusic . unmaybeMusic . firstSpecies2toMusic) beethoven146a2
+

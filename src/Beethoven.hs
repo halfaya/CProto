@@ -36,6 +36,21 @@ beethoven146a = FirstSpecies2
    (Just (g 5) , Just (d 6)) ,
    (Just (g 5) , Just (c 6)) ]
 
+beethoven146a2 :: FirstSpecies2 (Maybe PSym)
+beethoven146a2 = FirstSpecies2
+  [(Just (G Na, 5) , Just (C Na, 6)) ,
+   (Just (C Na, 6) , Just (E Na, 6)) ,
+   (Just (B Na, 5) , Just (G Na, 6)) ,
+   (Just (A Na, 5) , Just (F Na, 6)) ,
+   (Just (G Na, 5) , Just (E Na, 6)) ,
+   (Just (F Na, 5) , Just (C Na, 6)) ,
+   (Just (A Na, 5) , Just (A Na, 6)) ,
+   (Just (C Na, 6) , Just (F Na, 6)) ,
+   (Just (B Na, 5) , Just (G Na, 6)) ,
+   (Just (G Na, 5) , Just (E Na, 6)) ,
+   (Just (G Na, 5) , Just (D Na, 6)) ,
+   (Just (G Na, 5) , Just (C Na, 6)) ]
+
 -- Haydn's correction
 beethoven146h :: FirstSpecies2 (Maybe Pitch)
 beethoven146h = FirstSpecies2

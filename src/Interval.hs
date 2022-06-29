@@ -15,6 +15,9 @@ type Opi     = Int8
 opi :: (Num a) => (a , a) -> a
 opi (p1 , p2) = p2 - p1
 
+opiSym :: (PSym, PSym) -> Interval
+opiSym (p , q) = vi (opi (psymToPitch p, psymToPitch q))
+
 data Interval =
   Per1  |
   Min2  |
@@ -36,6 +39,7 @@ data Interval =
   Per11 |
   Aug11 |
   Per12
+  deriving Show
 
 iv :: Interval -> Opi
 iv Per1  = 0
@@ -58,6 +62,28 @@ iv Maj10 = 16
 iv Per11 = 17
 iv Aug11 = 18
 iv Per12 = 19
+
+vi :: Opi -> Interval
+vi 0  = Per1
+vi 1  = Min2
+vi 2  = Maj2
+vi 3  = Min3
+vi 4  = Maj3
+vi 5  = Per4
+vi 6  = Aug4
+vi 7  = Per5
+vi 8  = Min6
+vi 9  = Maj6
+vi 10 = Min7
+vi 11 = Maj7
+vi 12 = Per8
+vi 13 = Min9
+vi 14 = Maj9
+vi 15 = Min10
+vi 16 = Maj10
+vi 17 = Per11
+vi 18 = Aug11
+vi 19 = Per12
 
 --intervalWithinOctave :: SUpi -> SUpi
 --intervalWithinOctave i = i `sMod` 12
@@ -85,6 +111,7 @@ isPerfect i =
   (i == f Per4)  ||
   (i == f Per5)  ||
   (i == f Per8)  ||
+  (i == f Per11)  ||
   (i == f Per12)
   where f = fromInt8 . iv
 

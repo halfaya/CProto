@@ -25,9 +25,7 @@ instance (Show a) => Show (Music a) where
 data Location = Location Int Int Int
 
 instance Show Location where
-  show (Location voice bar beat) = "Voice " ++ show voice ++ " bar " ++ show bar ++ " beat " ++ show beat
-
---instance Range1 
+  show (Location voice bar beat) = "Voice " ++ show voice ++ " Bar " ++ show bar ++ " Beat " ++ show beat
 
 mapBeat :: (a -> b) -> Beat a -> Beat b
 mapBeat f (Beat x) = Beat (f x)
@@ -62,6 +60,14 @@ flattenVoice (Voice xs) = concat (map flattenBar xs)
 flattenMusic :: Music a -> [[a]]
 flattenMusic (Music xs) = map flattenVoice xs
 
+-- runtime error if location doesn't exist
+lookup :: Location -> Music a -> a
+lookup (Location voice bar beat) (Music m) =
+  let (Voice v) = m !! voice
+      (Bar b)   = v !! bar
+      (Beat x)  = b !! beat
+  in x
+
 -- one beat per bar
 b1 :: a -> Bar a
 b1 x = Bar [Beat x]
@@ -78,3 +84,7 @@ firstSpecies2toMusic (FirstSpecies2 xs) =
   let v1 = map (b1 . fst) xs
       v2 = map (b1 . snd) xs
   in Music [Voice v1, Voice v2]
+
+-- unsafe for now
+unmaybeMusic :: Music (Maybe a) -> Music a
+unmaybeMusic = mapMusic (\(Just x) -> x)

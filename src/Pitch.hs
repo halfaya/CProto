@@ -42,20 +42,42 @@ inScale scale p =
 majorScale :: Scale
 majorScale = [0, 2, 4, 5, 7, 9, 11]
 
--- Pitch name
-data PName = C | D | E | F | G | A | B
-  deriving Show
-
 -- Accidental
-data PAcc = Fl | Nat | Sh
+data PAcc = Fl | Na | Sh
 
 instance Show PAcc where
   show Fl  = "♭"
-  show Nat = "♮"
+  show Na = "" --"♮"
   show Sh  = "♯"
 
--- Symbolic pitch
-data PSym = PSym PName PAcc
+-- Symbolic pitch class
+data PC = C PAcc | D PAcc | E PAcc | F PAcc | G PAcc | A PAcc | B PAcc
 
-instance Show PSym where
-  show (PSym n a) = show n ++ show a
+instance Show PC where
+  show (C a) = "C" ++ show a
+  show (D a) = "D" ++ show a
+  show (E a) = "E" ++ show a
+  show (F a) = "F" ++ show a
+  show (G a) = "A" ++ show a
+  show (A a) = "B" ++ show a
+  show (B a) = "C" ++ show a
+
+-- Symbolic pitch
+type PSym = (PC , Octave)
+
+paccToMod :: PAcc -> Int8
+paccToMod Fl = -1
+paccToMod Na = 0
+paccToMod Sh = 1
+
+pcToPitch :: PC -> Pitch
+pcToPitch (C a) = 0  + paccToMod a
+pcToPitch (D a) = 2  + paccToMod a
+pcToPitch (E a) = 4  + paccToMod a
+pcToPitch (F a) = 5  + paccToMod a
+pcToPitch (G a) = 7  + paccToMod a
+pcToPitch (A a) = 9  + paccToMod a
+pcToPitch (B a) = 11 + paccToMod a
+
+psymToPitch :: PSym -> Pitch
+psymToPitch (pc, o) = pcToPitch pc + o * 12
