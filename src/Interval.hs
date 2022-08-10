@@ -39,7 +39,7 @@ data Interval =
   Per11 |
   Aug11 |
   Per12
-  deriving Show
+  deriving (Eq, Show)
 
 iv :: Interval -> Opi
 iv Per1  = 0
